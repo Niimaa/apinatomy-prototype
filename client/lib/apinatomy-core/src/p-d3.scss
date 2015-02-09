@@ -1,0 +1,21 @@
+.circuitboard > svg.d3 {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  pointer-events: none;
+
+  svg.vertex {
+    overflow: visible;
+	  cursor: pointer;
+  }
+
+  &.dragging-vertex {
+    pointer-events: all;
+    cursor: grabbing;
+  }
+}

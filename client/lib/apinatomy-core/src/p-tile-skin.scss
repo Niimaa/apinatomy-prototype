@@ -1,0 +1,40 @@
+.skinned-tile {
+	display: flex;
+	user-select: none;
+	flex-direction: column;
+
+	& > header {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		border-width: 1px;
+		overflow: hidden;
+	}
+}
+
+.skinned-tile.open > header {
+	height: 26px;
+	border-style: none none solid none;
+	line-height: 26px;
+	font-size: 19.5px !important; // to overwrite auto-resizing
+	white-space: nowrap;
+}
+
+.skinned-tile:not(.open) > header {
+	flex-grow: 1;
+  	padding: 0 5px;
+}
+
+.skinned-tile > section {
+	user-select: text;
+}
+
+.skinned-tile.open > section {
+  flex-grow: 1;
+  opacity: 1;
+}
+
+.skinned-tile:not(.open) > section {
+	opacity: 0;
+}

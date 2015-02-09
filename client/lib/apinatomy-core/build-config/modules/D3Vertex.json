@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "D3Vertex",
+	"file": "D3Vertex.js"
+	
+		, "var": "D3Vertex"
+	
+}

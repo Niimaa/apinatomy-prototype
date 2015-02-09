@@ -1,0 +1,7 @@
+{
+  "type": "external-library",
+  "name": "bacon.jquery",
+  "dir": "bacon.jquery/dist",
+  "file": "bacon.jquery.js"
+
+}

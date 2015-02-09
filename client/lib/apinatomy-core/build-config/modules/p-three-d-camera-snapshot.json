@@ -1,0 +1,6 @@
+{
+    "type": "internal-library",
+	"name": "p-three-d-camera-snapshot",
+	"file": "p-three-d-camera-snapshot.js"
+
+}

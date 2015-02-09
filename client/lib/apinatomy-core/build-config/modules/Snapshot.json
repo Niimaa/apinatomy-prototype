@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "Snapshot",
+	"file": "Snapshot.js"
+	
+		, "var": "Snapshot"
+	
+}

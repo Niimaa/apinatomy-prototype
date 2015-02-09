@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "Artefact",
+	"file": "Artefact.js"
+	
+		, "var": "Artefact"
+	
+}

@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "ThreeDModel",
+	"file": "ThreeDModel.js"
+	
+		, "var": "ThreeDModel"
+	
+}

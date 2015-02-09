@@ -1,0 +1,7 @@
+{
+    "type": "external-library",
+	"name": "delta-js",
+	"dir": "delta.js/dist",
+	"file": "delta.js",
+	"var": "DeltaModel"
+}

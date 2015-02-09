@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "D3Edge",
+	"file": "D3Edge.js"
+	
+		, "var": "D3Edge"
+	
+}

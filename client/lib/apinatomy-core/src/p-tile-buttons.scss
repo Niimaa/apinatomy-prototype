@@ -1,0 +1,26 @@
+.tile > .tile-button-holder {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  top: 2px;
+  right: 2px;
+  margin: 0;
+  padding: 0;
+}
+
+.tile > .tile-button-holder > .tile-button {
+  display: block;
+  background-size: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 2px;
+
+  border: solid 1px transparent;
+  &:hover { border: dotted 1px white  }
+}
+
+.tile:not(:hover) > .tile-button-holder {
+    display: none;
+}

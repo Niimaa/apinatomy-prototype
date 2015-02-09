@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$/.editorconfig" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/.jshintrc" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/README.md" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bower.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/build-config/modules/fma-model.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/build-config/modules/p-ppi.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/build-config/modules/p-tile-hidden.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/build-config/modules/p-tile-maximized.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/build-config/modules/p-tile-middleclick-to-maximize.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/gulpfile.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/package.json" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/Artefact.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/circuitboard.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/fma-model.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-d3.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-d3.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-position-tracking.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-ppi.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-ppi.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-three-d.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-three-d.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-active.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-click-to-open.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-grow-when-open.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-grow-when-open.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-hidden.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-hidden.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-maximized.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-maximized.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-open-active.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-open.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-skin-grow-when-open.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-skin-grow-when-open.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-skin.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-skin.scss" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-spacing.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-tile-weight.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/p-transition-position-tracking.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/defaults.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/defer.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/misc.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/nested-flex-grow.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/newWidgetType.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/plugin.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/put-css-rules.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/traverse-dag.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/util/unique-id.js" charset="UTF-8" />
+  </component>
+</project>

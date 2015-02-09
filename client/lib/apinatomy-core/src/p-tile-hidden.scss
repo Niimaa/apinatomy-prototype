@@ -1,0 +1,10 @@
+.circuitboard .tilemap {
+	& > .tilerow {
+		& > .tile:last-of-type(:not(.hidden)) {
+			margin-right: 0 !important;
+		}
+		&:last-of-type(:not(.hidden)) {
+			margin-bottom: 0 !important;
+		}
+	}
+}

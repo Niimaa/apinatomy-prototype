@@ -1,0 +1,8 @@
+{
+    "type": "internal-library",
+	"name": "D3Group",
+	"file": "D3Group.js"
+	
+		, "var": "D3Group"
+	
+}

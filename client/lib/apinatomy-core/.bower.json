@@ -1,0 +1,51 @@
+{
+  "name": "apinatomy-core",
+  "version": "0.25.0",
+  "description": "the core component (widget) of the ApiNATOMY circuit-board",
+  "authors": [
+    {
+      "name": "Michiel Helvensteijn",
+      "email": "mhelvens@gmail.com"
+    }
+  ],
+  "license": "MIT",
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1",
+    "js-graph": "~0.4.0",
+    "bluebird": "~2.3.2",
+    "chroma-js": "~0.5.8",
+    "d3": "~3.4.11",
+    "three.js": "*",
+    "delta.js": "~0.3.0",
+    "bacon": "~0.7.37",
+    "bacon.jquery": "~0.4.11",
+    "tweenjs": "*",
+    "bacon.model": "mhelvens/bacon.model#master"
+  },
+  "devDependencies": {
+    "requirejs-domready": "~2.0.1",
+    "requirejs": "~2.1.14",
+    "traceur": "~0.0.58",
+    "spin.js": "~2.0.1",
+    "d3": "~3.4.12"
+  },
+  "keywords": [
+    "apinatomy",
+    "biojs"
+  ],
+  "homepage": "https://github.com/mhelvens/apinatomy-core",
+  "_release": "0.25.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.25.0",
+    "commit": "1b55428878f7566d457d85fd0beca008db83e285"
+  },
+  "_source": "git://github.com/mhelvens/apinatomy-core.git",
+  "_target": "~0.25.0",
+  "_originalSource": "apinatomy-core",
+  "_direct": true
+}

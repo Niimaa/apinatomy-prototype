@@ -1,0 +1,10 @@
+.circuitboard .tilemap {
+	& > .tilerow {
+		& > .tile.maximized {
+			margin-right: 0 !important;
+		}
+		&.maximized {
+			margin-bottom: 0 !important;
+		}
+	}
+}

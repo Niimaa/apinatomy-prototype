@@ -1,0 +1,6 @@
+{
+    "type": "internal-library",
+	"name": "p-snapshot",
+	"file": "p-snapshot.js"
+	
+}

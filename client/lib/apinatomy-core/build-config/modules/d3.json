@@ -1,0 +1,7 @@
+{
+	"type": "external-library",
+	"name": "d3",
+	"dir": "d3",
+	"file": "d3.js",
+	"var": "d3"
+}

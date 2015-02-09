@@ -1,0 +1,97 @@
+svg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100%;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+
+	text-rendering: geometricPrecision;
+
+	.delta {
+		overflow: visible;
+		cursor: pointer;
+
+		& > rect {
+			fill: transparentize(white, .3);
+			stroke: black;
+			stroke-width: 1.5px;
+		}
+
+		&.always {
+			& > rect {
+				fill: transparentize(lightgreen, .3);
+			}
+			& > text {
+				font-weight: bold;
+			}
+		}
+
+		&.resolution {
+			& > rect {
+				stroke: lightgray;
+				stroke-dasharray: 5, 5;
+			}
+			& > text {
+				stroke: lightgray;
+				font-style: italic;
+			}
+		}
+
+		&.focus-connected {
+			&:not(.focus) > rect {
+				stroke: black !important;
+				stroke-width: 2px !important;
+			}
+			&:not(.focus) > text {
+				stroke: black !important;
+			}
+			&.focus > rect {
+				stroke: darkgreen;
+				stroke-width: 2px !important;
+			}
+			&.focus > text {
+				stroke: darkgreen;
+			}
+		}
+
+		&.not-focus-connected {
+			& > rect {
+				stroke: lightgray !important;
+				stroke-width: 1px !important;
+			}
+			& > text {
+				stroke: lightgray !important;
+			}
+		}
+	}
+
+	.application-order {
+		stroke-width: 1.5px;
+		stroke-linecap: round;
+
+		&:not(.resolution) {
+			stroke: black;
+			marker-end: url(#arrow-tip);
+		}
+
+		&.resolution {
+			stroke: lightgray;
+			stroke-dasharray: 5, 5;
+			marker-end: url(#gray-arrow-tip);
+		}
+
+		&.focus-connected {
+			stroke: black !important;
+			stroke-width: 2px !important;
+			marker-end: url(#arrow-tip) !important;
+		}
+
+		&.not-focus-connected {
+			stroke: lightgray !important;
+			stroke-width: 1px !important;
+			marker-end: url(#gray-arrow-tip) !important;
+		}
+	}
+}

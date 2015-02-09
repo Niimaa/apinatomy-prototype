@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SpyJsConfiguration">
+    <event-filters>
+      <event-filter name="No require">
+        <event-filter-conditions>
+          <event-filter-condition type="file" value="http://localhost:61234/apinatomy-core/bower_components/requirejs/require.js" />
+          <event-filter-condition value="external" />
+        </event-filter-conditions>
+      </event-filter>
+    </event-filters>
+  </component>
+</project>

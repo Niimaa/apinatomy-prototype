@@ -1,0 +1,30 @@
+.circuitboard {
+	display: flex;
+	align-items: stretch;
+	padding: 0;
+
+	.tilemap {
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		& > .tilerow {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			margin: 0;
+			padding: 0;
+			height: 0;
+			& > .tile {
+				width: 0;
+				margin: 0;
+				padding: 0;
+				&:last-child {
+					margin-right: 0 !important;
+				}
+			}
+			&:last-child {
+				margin-bottom: 0 !important;
+			}
+		}
+	}
+}

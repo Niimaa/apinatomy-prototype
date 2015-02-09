@@ -1,0 +1,7 @@
+{
+  "type": "external-library",
+  "name": "bacon.model",
+  "dir": "bacon.model/dist",
+  "file": "bacon.model.js"
+
+}
