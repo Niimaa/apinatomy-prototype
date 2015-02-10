@@ -60,7 +60,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    name: 'tile-skin',
 	    requires: ['tile-open', 'position-tracking']
 	  }).modify('Tile.prototype');
-
 	  var applyStyleDefaults = defaults({
 	    '&': {
 	      backgroundColor: " 'white'                                                                ",
@@ -71,7 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    '& > icon-btn': {backgroundColor: " `['&'].backgroundColor` "}
 	  }, {color: color});
 	  plugin.insert('construct', function() {
-		  var $__0 = this;
+	    var $__0 = this;
 	    var origElement = this.dom;
 	    origElement.addClass('skinned-tile');
 	    this._p_tileSkin_headerElement = $("<header/>").appendTo(origElement);
@@ -79,11 +78,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.model.get('name').then((function(name) {
 	      $__0._p_tileSkin_headerElement.text(name);
 	    }));
-
-		  this.model.then(function (m) {
-				  console.log('--', m);
-		  });
-
 	    this.model.get('tile').get('normal').get('css').then((function(css) {
 	      $__0.element.amyPutCssRules(applyStyleDefaults(css));
 	    })).catch((function() {}));

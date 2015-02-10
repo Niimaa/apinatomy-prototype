@@ -1,4 +1,4 @@
-define(['jquery', '../../../d3/d3', '../util/misc.js', '../util/bacon-and-eggs.js', './intersects.js'], function ($, d3, U, Bacon) {
+define(['jquery', 'd3', '../util/misc.js', '../util/bacon-and-eggs.js', './intersects.js'], function ($, d3, U, Bacon) {
 	'use strict';
 
 	var NODE_MARGIN = 15;

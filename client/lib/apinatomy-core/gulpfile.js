@@ -128,7 +128,7 @@ INTERNAL_LIBRARIES.concat(APPLICATIONS).forEach(function (m) {
 					sourceMapFilename: m.file+'.map'
 				},
 				resolve: {
-					modulesDirectories: ['node_modules', 'lib'],
+					modulesDirectories: ['node_modules', 'bower_components'],
 					alias: WEBPACK_ALIAS
 				},
 				target: 'web'

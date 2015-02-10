@@ -1,4 +1,4 @@
-define(['jquery', 'bluebird', './util/misc.js', './util/defer.js', './util/main-delta-model.js', './24tiles.json'], ($, P, U, defer, dm, tfTiles) => {
+define(['jquery', 'bluebird', './util/misc.js', './util/defer.js', './util/main-delta-model.js', './24tiles.JSON'], ($, P, U, defer, dm, tfTiles) => {
 	'use strict';
 
 
@@ -53,41 +53,43 @@ define(['jquery', 'bluebird', './util/misc.js', './util/defer.js', './util/main-
 				_getDeferred(id).promise.id = id;
 				_getDeferred(id).promise.type = 'fma';
 
-				if (id.substr(0, id.indexOf(':')-1) === '24tile') {
-					/* immediately resolve */
-					_getDeferred(id).resolve(tfTiles[id]);
-				} else {
-					/* register to be requested from the server */
-					newIds.push(id);
+				/* register to be requested from the server */
+				newIds.push(id);
+
+				/* if it is a 24tile type entity: immediately resolve */
+				if (id.substr(0, id.indexOf(':')) === '24tile') {
+					_getDeferred(id).resolve(new FmaModel(tfTiles[id]));
 				}
 			}
 		});
 
-		/* request and build the model objects belonging to those ids */
-		P.resolve($.ajax({
-			url: `http://open-physiology.org:20080/apinatomy/${newIds.join(',')}`,
-			dataType: 'jsonp'
-		})).each((modelObj) => {
+		/* request and build the model objects belonging to any new ids */
+		if (newIds.length > 0) {
+			P.resolve($.ajax({
+				url: `http://open-physiology.org:20080/apinatomy/${newIds.join(',')}`,
+				dataType: 'jsonp'
+			})).each((modelObj) => {
 
-			/*  remove references to children that are not actually   */
-			/*  in the database (the FMA database is messy that way)  */
-			for (var i = modelObj.sub.length - 1; i >= 0; i -= 1) {
-				if (modelObj.sub[i].entity === null) {
-					modelObj.sub.splice(i);
+				/*  remove references to children that are not actually   */
+				/*  in the database (the FMA database is messy that way)  */
+				for (var i = modelObj.sub.length - 1; i >= 0; i -= 1) {
+					if (modelObj.sub[i].entity === null) {
+						modelObj.sub.splice(i);
+					}
 				}
-			}
 
-			/* create the new model object based on the prototype */
-			var newModel = new FmaModel(modelObj);
+				/* create the new model object based on the prototype */
+				var newModel = new FmaModel(modelObj);
 
-			/* remove counter from name */
-			var match = newModel.name.match(/^(.*)\(\d+\)$/);
-			if (match) { newModel.name = match[1] }
+				/* remove counter from name */
+				var match = newModel.name.match(/^(.*)\(\d+\)$/);
+				if (match) { newModel.name = match[1] }
 
-			/* resolve the corresponding promise */
-			_getDeferred(newModel.id).resolve(newModel);
+				/* resolve the corresponding promise */
+				_getDeferred(newModel.id).resolve(newModel);
 
-		});
+			});
+		}
 
 		/* return an array of promises to all requested ids */
 		return ids.map((id) => _getDeferred(id).promise);

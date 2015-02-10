@@ -1,6 +1,6 @@
 define([
 	'jquery',
-	'../../d3/d3',
+	'd3',
 	'./util/misc.js',
 	'./util/bacon-and-eggs.js',
 	'./p-d3.scss'
