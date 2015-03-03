@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env babel-node
 
 "use strict";
 
@@ -13,6 +13,7 @@ var defaultOutput = path.join(__dirname, "spec", "BaconSpec.coffee");
 
 // Boilerplate: *header* and *footer*
 var header = fs.readFileSync(path.join(__dirname, "spec", "boilerplate", "SpecHeader.coffee"), "utf-8");
+var helper = fs.readFileSync(path.join(__dirname, "spec", "boilerplate", "SpecHelper.coffee"), "utf-8");
 
 function resolvePieceNames() {
   var argPieceNames =  process.argv.slice(2)
@@ -27,7 +28,7 @@ function readPiece(pieceName) {
 
 function buildArgs(pieceNames) {
   if (pieceNames.length > 3) return ""
-  var pieceNames = Deps.resolvePieces(pieceNames, "spec/specs")
+  var pieceNames = Deps.resolvePieces(pieceNames, "spec/specs", { recursive: false })
     .map(function(piece) { return piece.name })
   return pieceNames.join(" ")
 }
@@ -37,6 +38,7 @@ var main = function(options){
   var pieces = pieceNames.map(readPiece)
   var output = [
     header,
+    helper,
     pieces.join("\n"),
   ].join("\n");
 

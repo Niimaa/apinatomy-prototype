@@ -15,15 +15,14 @@ define(['jquery'], function ($) {
 		this.newProperty('open', { initial: false });
 
 		/* when the tile opens, populate the inner tilemap */
-		this.on('open').value(true).take(1).assign(this, 'populateInnerTilemap');
+		this.p('open').value(true).take(1).onValue(() => { this.populateInnerTilemap() }); // TODO: delay by opening-animation time
 
 		/* manage the CSS class 'open' */
-		this.on('open').assign(this.element, 'toggleClass', 'open');
+		this.p('open').onValue((o) => { this.element.toggleClass('open', o) });
 
 		/* if this tile closes, all its children close */
-		this.on('open').value(false).onValue(() => {
-			this.closestDescendantsByType('tile')
-						.forEach((tile) => { tile.open = false });
+		this.p('open').value(false).onValue(() => {
+			this.closestDescendantsByType('Tile').forEach((tile) => { tile.open = false });
 		});
 
 	});

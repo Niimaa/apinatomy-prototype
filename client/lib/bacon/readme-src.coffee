@@ -56,6 +56,9 @@ For [bower](https://github.com/twitter/bower) users:
 
 Both minified and unminified versions available on [cdnjs](https://cdnjs.com/libraries/bacon.js).
 
+Starting from 0.7.45, you can build your own Bacon.js bundle with selected features
+only. See instructions [here](#build).
+
 Prefer to drink from the firehose? Download from Github [master](https://raw.github.com/baconjs/bacon.js/master/dist/Bacon.js).
 
 Visual Studio users can obtain version 0.7.16 via NuGet Packages
@@ -170,14 +173,14 @@ This stream will contain a single value or an error, followed immediately by str
 Check out this [example](https://github.com/raimohanska/baconjs-examples/blob/master/resources/public/index.html).
 """
 
-doc.fn "Bacon.fromEventTarget(target : EventTarget | EventEmitter, eventName : String [, eventTransformer]) : EventStream", """
+doc.fn "Bacon.fromEvent(target : EventTarget | EventEmitter, eventName : String [, eventTransformer]) : EventStream", """
 creates an EventStream from events
 on a DOM EventTarget or Node.JS EventEmitter object, or an object that supports event listeners using `on`/`off` methods.
 You can also pass an optional function that transforms the emitted
 events' parameters.
 
 ```js
-Bacon.fromEventTarget(document.body, "click").onValue(function() { alert("Bacon!") })
+Bacon.fromEvent(document.body, "click").onValue(function() { alert("Bacon!") })
 ```
 """
 
@@ -267,6 +270,31 @@ doc.fn "Bacon.repeatedly(interval : Number, values : Array[A]) : EventStream[A]"
 repeats given elements indefinitely
 with given interval in milliseconds. For example, `repeatedly(10, [1,2,3])`
 would lead to `1,2,3,1,2,3...` to be repeated indefinitely.
+"""
+
+doc.fn "Bacon.repeat(fn: Number -> Observable[A]): EventStream[A]", """
+Calls generator function which is expected to return an observable. The returned EventStream contains 
+values and errors from the spawned observable. When the spawned observable ends, the generator is called 
+again to spawn a new observable. 
+
+This is repeated until the generator returns a falsy value 
+(such as `undefined` or `false`).
+
+The generator function is called with one argument — iteration number starting from `0`.
+
+Here's an example:
+
+```js
+Bacon.repeat(function(i) {
+  if (i < 3) {
+    return Bacon.once(i);
+  } else {
+    return false;
+  }
+}).log()
+```
+
+The example will produce values 0, 1 and 2.
 """
 
 doc.fn "Bacon.never() : EventStream", """
@@ -398,6 +426,13 @@ subscribes a callback to stream end. The function will
 be called when the stream ends. Just like `subscribe`, this method returns a function for unsubscribing.
 """
 
+doc.fn "observable.toPromise(@ : Observable[A]) : Promise[A]", """
+returns a Promise which will be resolved with the first event coming from an Observable.
+The global ES6 promise implementation will be used.
+Use shim if you need to support legacy browsers or platforms.
+[caniuse promises](http://caniuse.com/#feat=promises).
+"""
+
 doc.fn "observable.map(@ : Observable[A], f : A -> B) : Observable[B]", """
 maps values using given function, returning a new
 EventStream. Instead of a function, you can also provide a constant
@@ -472,6 +507,16 @@ doc.fn "observable.takeUntil(@ : Observable[A], stream : EventStream[B]) : Obser
 takes elements from source until a Next event
 appears in the other stream. If other stream ends without value, it is
 ignored
+"""
+
+doc.fn "observable.first(@ : Observable[A]) : Observable[A]", """
+takes the first element from the stream. Essentially `observable.take(1)`.
+"""
+
+doc.fn "observable.last(@ : Observable[A]) : Observable[A]", """
+takes the last element from the stream. None, if stream is empty.
+
+*Note:* `neverEndingStream.last()` creates the stream which doesn't produce any events and never ends.
 """
 
 doc.fn "observable.skip(n)", """
@@ -599,10 +644,16 @@ The [Function Construction rules](#function-construction-rules) below apply here
 """
 
 doc.fn "observable.flatMapFirst(f)", """
-like flatMap, but only spawns a new
+like `flatMap`, but only spawns a new
 stream if the previously spawned stream has ended.
 
 The [Function Construction rules](#function-construction-rules) below apply here.
+"""
+
+doc.fn "observable.flatMapError(f)", """
+like `flatMap`, but is applied only on [`Error`](#bacon-error) events. Returned values go into the
+value stream, unless an error event is returned. As an example, one type of error could result in a retry and another just
+passed through, which can be implemented using flatMapError.
 """
 
 doc.fn "observable.flatMapWithConcurrencyLimit(@ : Observable[A], limit : Number, f : A -> Observable[B] | Event[B] | B) : EventStream[B]", """
@@ -1421,6 +1472,14 @@ stream = Bacon.fromArray([1,2,3,4]).flatMap(function(x) {
 })
 ```
 
+Conversely, if you want to convert some [`Error`](#bacon-error) events into value events, you may use `flatMapError`:
+
+```js
+myStream.flatMapError(function(error) {
+  return isNonCriticalError(error) ? handleNonCriticalError(error) : new Bacon.Error(error)
+})
+```
+
 Note also that Bacon.js combinators do not catch errors that are thrown.
 Especially [`map`](#observable-map) doesn't do so. If you want to map things
 and wrap caught errors into Error events, you can do the following:
@@ -1445,17 +1504,26 @@ such as AJAX calls.
 """
 
 doc.fn "Bacon.retry(options)", """
+is used to retry the call when there is an [`Error`](#bacon-error) event in the stream produced by the `source` function.
 
-is used to retry the call when there is an [`Error`](#bacon-error) event in the source stream.
+The two required option parameters are:
+
+* `source`, a function that produces an Observable.
+* `retries`, the number of times to retry the `source` function _in addition to the initial attempt_.
+
+Additionally, one may pass in one or both of the following callbacks:
+
+* `isRetryable`, a function returning `true` to continue retrying, `false` to stop. Defaults to `true`. The error that occurred is given as a parameter. For example, there is usually no reason to retry a 404 HTTP error, whereas a 500 or a timeout might work on the next attempt.
+* ```delay```, a function that returns the time in milliseconds to wait before retrying. Defaults to `0`. The function is given a context object with the keys ```error``` (the error that occurred) and `retriesDone` (the number of retries already performed) to help determine the appropriate delay e.g. for an incremental backoff.
 
 ```js
-var source, ajaxCall // <- ajaxCall gives Errors on network or server errors
-ajaxResult = source.flatMap(function(url) {
+var triggeringStream, ajaxCall // <- ajaxCall gives Errors on network or server errors
+ajaxResult = triggeringStream.flatMap(function(url) {
     return Bacon.retry({
-        // function to call when trying, should return an EventStream
         source: function() { return ajaxCall(url) },
-        retries: 5, // nr of times to retry before giving up
-        delay: function() { return 100; } // delay in ms between retries
+        retries: 5,
+        isRetryable: function (error) { return error.httpStatusCode !== 404; },
+        delay: function(context) { return 100; } // Just use the same delay always
     })
 })
 ```
@@ -1745,31 +1813,49 @@ See [Specs](https://github.com/baconjs/bacon.js/blob/master/spec/BaconSpec.coffe
 See Worzone [demo](http://juhajasatu.com/worzone/) and [source](http://github.com/raimohanska/worzone)
 """
 
-doc.section "Install by npm"
-doc.text """
-Bacon uses npm to install the dependencies needed for compiling the coffeescript source and run the test. So first run:
-
-    npm install
-"""
-
 doc.section "Build"
 doc.text """
-Build the coffeescript source into javascript:
 
-    grunt
+First check out the Bacon.js repository and run `npm install`.
 
-Result javascript files will be generated in `dist` directory.
+Then build the coffeescript sources into javascript:
+
+    ./build
+
+Result javascript files will be generated in `dist` directory. If your planning
+to develop Bacon.js yourself, you'll want to run [tests] too.
+
+You can also build a bundle with selected features only. For instance
+
+    ./build flatmap combine takeuntil
+
+The build system will do its best to determine the dependencies of the selected
+features and include those into the bundle too. You can also test the integrity
+of the bundle with your selected features using
+
+    ./test flatmap combine takeuntil
+
 """
 
 doc.section "Test"
 doc.text """
-Run unit tests:
+Run all unit tests:
 
     ./test
 
-Run some unit tests:
+Run limited set of unit tests:
 
     ./test core _ frompromise
+
+The names correspond to the file names under `src/spec/specs`. The library will
+be built with the listed features only.
+
+You can also test all features individually:
+
+    ./test-individually.js
+
+This will loop thru all files under `spec/specs` and build the library with the
+single feature and run the test.
 
 Run browser tests (using testem):
 

@@ -21,16 +21,15 @@ define([
 			this.newProperty('y', { initial: 10 });
 
 			/* the 'visible' and 'hidden' properties */
-			this.newProperty('visible', { initial: true });
-			this.newProperty('hidden');
-			this.p('visible').addSource(this.p('hidden').not());
-			this.p('hidden').addSource(this.p('visible').not());
+			this.newProperty('visible', { initial: visible });
+			this.newProperty('hidden').plug(this.p('visible').not());
+			this.p('visible').plug(this.p('hidden').not());
 
 			/* enact vertex hiding on the DOM */
-			this.on('hidden').assign(this.element, 'toggleClass', 'hidden');
-
-			/* when the tile is destroyed, it is also hidden */
-			this.on('destroy').take(1).onValue(() => { this.hidden = true });
+			this.p('hidden').merge(this.on('destroy').mapTo(true)).onValue((h) => {
+				this.element.toggleClass('hidden',   h)
+				            .toggleClass('visible', !h);
+			});
 
 		}, {
 

@@ -1,1 +1,1 @@
-{ "test": "\\.js$", "loader": "traceur?script" }
+{ "test": "\\.js$", "loader": "traceur?sourceMaps=false&script" }

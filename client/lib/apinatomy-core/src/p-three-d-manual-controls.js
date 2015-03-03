@@ -1,4 +1,4 @@
-define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], function ($, U, THREE, Bacon) {
+define(['jquery', './util/misc.js', 'three-js', './util/kefir-and-eggs.js'], function ($, U, THREE, Kefir) {
 	'use strict';
 
 
@@ -38,17 +38,17 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 			});
 			this.getMouseOnScreen = (pageX, pageY) => {
 				return new THREE.Vector2(
-						(pageX - this._screen.left) / this._screen.width,
-						(pageY - this._screen.top) / this._screen.height
+					(pageX - this._screen.left) / this._screen.width,
+					(pageY - this._screen.top) / this._screen.height
 				);
 			};
 
 
 			/* creating various event streams */
-			this.threeDCanvasElement.asEventStream('contextmenu').onValue('.preventDefault');
+			this.threeDCanvasElement.asKefirStream('contextmenu').onValue((event) => { event.preventDefault() });
 			var dragging = this.threeDCanvasElement.mouseDrag({ threshold: this.options.dragThreshold }).filter(() => this.threeDManualControlsEnabled);
-			var keydown = $(window).asEventStream('keydown').filter(() => this.threeDManualControlsEnabled);
-			var keyup = $(window).asEventStream('keyup');
+			var keydown = $(window).asKefirStream('keydown').filter(() => this.threeDManualControlsEnabled);
+			var keyup = $(window).asKefirStream('keyup');
 			var scrolling = this.threeDCanvasElement.mouseWheel().filter(() => this.threeDManualControlsEnabled);
 			var button = (b) => ({mouseDownEvent}) => (mouseDownEvent.which === b);
 			var key = (from, to) => (event) => (event.which >= from && event.which <= (to || from));
@@ -57,26 +57,27 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 			/* rotating with the left mouse button */
 			this._rotateStart = new THREE.Vector3();
 			this._rotateEnd = new THREE.Vector3();
+			var canvasOffset = this.threeDCanvasElement.offset();
 			dragging.filter(button(MOUSE_BUTTON.LEFT)).onValue(({mouseDownEvent, mouseMoveEvent}) => { // TODO: touch
 
 				somethingChanged = true;
 
 				if (!mouseDownEvent._pastFirst) {
 					mouseDownEvent._pastFirst = true;
-					this._rotateStart.copy(this.getMouseProjectionOnBall(mouseDownEvent.pageX, mouseDownEvent.pageY));
+					this._rotateStart.copy(this.getMouseProjectionOnBall(mouseDownEvent.pageX - canvasOffset.left, mouseDownEvent.pageY - canvasOffset.top));
 				}
-				this._rotateEnd.copy(this.getMouseProjectionOnBall(mouseMoveEvent.pageX, mouseMoveEvent.pageY));
+				this._rotateEnd.copy(this.getMouseProjectionOnBall(mouseMoveEvent.pageX - canvasOffset.left, mouseMoveEvent.pageY - canvasOffset.top));
 
 			});
 
 			/* rotating with the keyboard */
 			this.newProperty('currentArrowKey', {
 				initial: false
-			}).addSource(keydown.filter(key(37, 40)).flatMapLatest((keydownEvent) => Bacon.mergeAll([
-				Bacon.once(keydownEvent.which),
-				keyup.filter(key(keydownEvent.which)).map(false).take(1)
+			}).plug(keydown.filter(key(37, 40)).flatMapLatest((keydownEvent) => Kefir.merge([
+				Kefir.once(keydownEvent),
+				keyup.filter(key(keydownEvent.which)).mapTo(false).take(1)
 			])));
-			this.on('currentArrowKey').onValue(() => { somethingChanged = true });
+			this.on('currentArrowKey').changes().onValue(() => { somethingChanged = true });
 
 
 			/* zooming with the middle mouse button */
@@ -116,8 +117,6 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 			});
 
 
-
-
 			/* panning with the right mouse button */
 			this._panStart = new THREE.Vector2();
 			this._panEnd = new THREE.Vector2();
@@ -139,23 +138,19 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 			this._panSpeed = 1.0;
 			this._rotateSpeed = 1.0;
 			this.zoomSpeed = 1.0;
-			this.on('3d-render').takeWhile(this.on('threeDMode')).onValue(() => {
+			this.on('3d-render').takeWhileBy(this.p('threeDMode')).onValue(() => { // TODO: this doesn't reactivate when threeDMode is turned off and then on again!
 
 				if (somethingChanged || this.currentArrowKey) {
 					somethingChanged = false;
 
-
 					/* trigger event for manual controls used */
-					this.event('three-d-manual-controls-used').push();
-
+					this.event('three-d-manual-controls-used').emit();
 
 					/* setup */
 					this._eye.subVectors(this.camera3D.position, this.camera3D.userData.target);
 
-
 					/* panning */
 					(() => {
-
 							var mouseChange = new THREE.Vector2();
 							var objectUp = new THREE.Vector3();
 							var pan = new THREE.Vector3();
@@ -172,8 +167,8 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 								}
 								this._panStart.copy(this._panEnd);
 							}
-
 					})();
+
 					/* rotating by mouse */
 					(() => {
 						var axis = new THREE.Vector3();
@@ -192,28 +187,44 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 
 							this._eye.applyQuaternion(quaternion);
 							this.camera3D.up.applyQuaternion(quaternion);
-
 							this._rotateEnd.applyQuaternion(quaternion);
 							this._rotateStart.copy(this._rotateEnd);
 						}
 					})();
+
 					/* rotating by keyboard */
 					(() => {
 						if (this.currentArrowKey) {
-							var quaternion = new THREE.Quaternion();
-							var axis = new THREE.Vector3(
-									+(this.currentArrowKey === 38 || this.currentArrowKey === 40), // x
-									+(this.currentArrowKey === 37 || this.currentArrowKey === 39)  // y
-							);
+							var {which, ctrlKey} = this.currentArrowKey;
+							var axis = new THREE.Vector3();
+							     if ((which === 38 || which === 40) && !ctrlKey) { axis.set(1, 0, 0) } // x: up,down
+							else if ((which === 37 || which === 39) && !ctrlKey) { axis.set(0, 1, 0) } // y: left,right
+							else if ((which === 37 || which === 39) &&  ctrlKey) { axis.set(0, 0, 1) } // z: ctrl+left,right
+							else { return }
 							var angle = 0.015 * Math.PI * this._rotateSpeed;
-							if (this.currentArrowKey === 39 || this.currentArrowKey === 40) { angle *= -1 }
+							if (which === 39 || which === 40) { angle *= -1 }
 
+							var quaternion = new THREE.Quaternion();
 							quaternion.setFromAxisAngle(axis, -angle);
 							this._eye.applyQuaternion(quaternion);
 							this.camera3D.up.applyQuaternion(quaternion);
 						}
 					})();
-					/* zooming */
+
+					/* zooming by keyboard */
+					// leave this before the 'zooming by mouse' section
+					(() => {
+						if (this.currentArrowKey) {
+							var {which, ctrlKey} = this.currentArrowKey;
+							if (which === 38 && ctrlKey) { // ctrl+up
+								this._zoomStart.y += 0.02;
+							} else if (which === 40 && ctrlKey) { // ctrl+down
+								this._zoomStart.y -= 0.02;
+							}
+						}
+					})();
+
+					/* zooming by mouse */
 					(() => {
 						//if (this._state === STATE.TOUCH_ZOOM_PAN) {
 						//	this._touchZoomDistanceStart = this._touchZoomDistanceEnd;
@@ -229,7 +240,17 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 
 					})();
 
-
+					/* z-axis restriction */
+					if (this.options.forbidSubZeroZ) {
+						var eyeLength = this._eye.length();
+						if (this.camera3D.userData.target.z < 0) {
+							this.camera3D.userData.target.z = 0;
+						}
+						if (this._eye.z < 0) {
+							this._eye.z = 0;
+						}
+						this._eye.setLength(eyeLength);
+					}
 
 					/* breakdown */
 					this.camera3D.position.addVectors(this.camera3D.userData.target, this._eye);
@@ -237,10 +258,6 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 				}
 
 				this.camera3D.lookAt(this.camera3D.userData.target);
-
-
-
-
 
 			});
 
@@ -261,9 +278,6 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 
 		});
 	});
-
-
-
 
 
 	plugin.add('Circuitboard.prototype.getMouseProjectionOnBall', function getMouseProjectionOnBall(pageX, pageY) {
@@ -293,62 +307,6 @@ define(['jquery', './util/misc.js', 'three-js', './util/bacon-and-eggs.js'], fun
 
 		return vector;
 	});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//plugin.append('Circuitboard.prototype.construct', function () {
-	//	this.on('threeDMode', true).onValue(() => {
-	//
-	//
-	//
-	//		/* implementing the controls */
-	//		var controls = new THREE.TrackballControls(this.camera3D, this.threeDCanvasElement[0]);
-	//		U.extend(controls, {
-	//			rotateSpeed: 1.0,
-	//			zoomSpeed: 1.2,
-	//			panSpeed: 0.8
-	//		});
-	//		this.on('3d-render').takeWhile(this.on('threeDMode')).assign(controls, 'update');
-	//		this.on('size').takeWhile(this.on('threeDMode')).assign(controls, 'handleResize');
-	//		this.on('threeDControlsEnabled').takeWhile(this.on('threeDMode')).onValue((enabled) => { controls.enabled = enabled });
-	//
-	//	});
-	//});
 
 
 });

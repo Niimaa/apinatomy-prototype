@@ -1,4 +1,4 @@
-define(['jquery', 'bluebird', './misc.js', '../Artefact.js'], function ($, P, U, ArtefactP) {
+define(['jquery', 'bluebird', './misc.js', '../Artefact.js', './kefir-and-eggs.js'], function ($, P, U, ArtefactP) {
 	'use strict';
 
 
@@ -13,7 +13,7 @@ define(['jquery', 'bluebird', './misc.js', '../Artefact.js'], function ($, P, U,
 			if (U.isDefined(cssClass)) { this.element.addClass(cssClass) }
 
 			/* if the jquery element is removed, destroy the artefact */
-			this.element.asEventStream('remove').onValue(() => { this.destroy() });
+			this.element.asKefirStream('remove').onValue(() => { this.destroy() });
 
 		}, {
 

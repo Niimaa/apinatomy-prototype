@@ -2,11 +2,11 @@ define([
 	'jquery',
 	'chroma-js',
 	'./util/misc.js',
-	'./util/bacon-and-eggs.js',
+	'./util/kefir-and-eggs.js',
 	'./util/defaults.js',
 	'./util/put-css-rules.js',
 	'./p-tile-skin.scss'
-], function ($, color, U, Bacon, defaults) {
+], function ($, color, U, Kefir, defaults) {
 	'use strict';
 
 
@@ -29,7 +29,7 @@ define([
 		'& > icon-btn': {
 			backgroundColor: " `['&'].backgroundColor` "
 		}
-	}, { color: color });
+	}, { color });
 
 
 	/* make tiles look nice, with a header, content section, and CSS styling derived from the model */
@@ -50,7 +50,7 @@ define([
 				.catch(()=>{}); // it's OK if '.tile.normal.css' is not on the model
 
 		/* when the tile is closed, make the font size dynamic */
-		this.on('size').filter(this.on('open').not()).onValue((size) => {
+		this.on('size').filterBy(this.p('open').not()).onValue((size) => {
 			this._p_tileSkin_headerElement // formula gotten experimentally
 					.css('fontSize', Math.min(0.2 * Math.pow(size.height, 1.01), 0.13 * Math.pow(size.width, 1.01)));
 					// We're growing / shrinking the font size in proportion to the (1.01)st power of the tile size.
@@ -62,8 +62,8 @@ define([
 		this.newProperty('headerSize', {
 			settable: false,
 			isEqual: U.Size.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
+		}).plug(Kefir.merge([
+			Kefir.once(),
 			this.on('size').changes(),
 			this.on('open').changes()
 		]).map(() => new U.Size(this._p_tileSkin_headerElement.height(), this.size.width)));
@@ -72,7 +72,7 @@ define([
 		/* the 'headerPosition' observable */
 		this.newProperty('headerPosition', {
 			settable: false
-		}).addSource(this.on('position'));
+		}).plug(this.on('position'));
 
 	});
 });

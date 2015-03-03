@@ -20,6 +20,7 @@
       <w>gutil</w>
       <w>jshint</w>
       <w>jsonp</w>
+      <w>kefir</w>
       <w>keydown</w>
       <w>keypress</w>
       <w>keyup</w>
@@ -28,6 +29,7 @@
       <w>lundin</w>
       <w>memberof</w>
       <w>memoize</w>
+      <w>memoized</w>
       <w>middleclick</w>
       <w>mousewheel</w>
       <w>ness</w>

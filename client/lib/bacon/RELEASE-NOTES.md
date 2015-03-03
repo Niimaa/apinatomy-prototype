@@ -1,3 +1,45 @@
+## 0.7.52
+
+- Fix #560: unscheduling fail in case subscriber throws error
+
+## 0.7.51
+
+- Add `toPromise()`, `first()` and `last()` (#509)
+
+## 0.7.50
+
+- Fix #501: Call promise.done() to prevent swallowing exceptions from wrapped Promises
+
+## 0.7.49
+
+- Introduce Bacon.repeat(fn), previously known as Bacon.fromStreamGenerator
+
+## 0.7.48
+
+- Fix stack overflow with synchronous sources in Bacon.fromStreamGenerator
+
+## 0.7.47
+
+- Fix #541: stack overflow with Bacon.retry
+
+## 0.7.46
+
+- Fix #506: smarter method lookup in Bacon.fromEvent
+
+## 0.7.45
+
+- Fix #543: holdWhen with array values
+- Fix #544: bufferWithTimeOrCount
+
+## 0.7.44
+
+Foobar, don't use
+
+## 0.7.43
+
+- Add `Bacon.fromEvent` as shorthand for `Bacon.fromEventTarget`
+- Add `Observable :: forEach` as synonym for `onValue`
+
 ## 0.7.42
 
 - Fix #523: respect return value of subscribe function in synchronous case

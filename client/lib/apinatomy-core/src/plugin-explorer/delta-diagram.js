@@ -1,4 +1,4 @@
-define(['jquery', 'd3', '../util/misc.js', '../util/bacon-and-eggs.js', './intersects.js'], function ($, d3, U, Bacon) {
+define(['jquery', 'd3', '../util/misc.js', '../util/kefir-and-eggs.js', './intersects.js'], function ($, d3, U, Bacon) {
 	'use strict';
 
 	var NODE_MARGIN = 15;
@@ -297,30 +297,30 @@ define(['jquery', 'd3', '../util/misc.js', '../util/bacon-and-eggs.js', './inter
 			(dd.superiors || []).forEach((superior) => { visitSuperiors(superior, fn, before, after, done) });
 			after();
 		}
-		var focus = new Bacon.Model(null);
-		focus.onValue((newD) => {
-			if (newD) {
-				deltas.forEach((d) => {
-					d.distanceFromFocus = null;
-				});
-				var i = 0;
-				visitInferiors(newD,
-						(d) => { d.distanceFromFocus = i },
-						() => {i--},
-						() => {i++}
-				);
-				visitSuperiors(newD,
-						(d) => { d.distanceFromFocus = i },
-						() => {i++},
-						() => {i--}
-				);
-			} else {
-				deltas.forEach((d) => {
-					delete d.distanceFromFocus;
-				});
-			}
-			updateDiagram();
-		});
+		//var focus = new Bacon.Model(null); // TODO: Is this model ever used?
+		//focus.onValue((newD) => {
+		//	if (newD) {
+		//		deltas.forEach((d) => {
+		//			d.distanceFromFocus = null;
+		//		});
+		//		var i = 0;
+		//		visitInferiors(newD,
+		//				(d) => { d.distanceFromFocus = i },
+		//				() => {i--},
+		//				() => {i++}
+		//		);
+		//		visitSuperiors(newD,
+		//				(d) => { d.distanceFromFocus = i },
+		//				() => {i++},
+		//				() => {i--}
+		//		);
+		//	} else {
+		//		deltas.forEach((d) => {
+		//			delete d.distanceFromFocus;
+		//		});
+		//	}
+		//	updateDiagram();
+		//});
 
 
 

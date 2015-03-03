@@ -1,52 +1,47 @@
-define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U, Bacon) {
+define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U, Kefir) {
 	'use strict';
 
 
 	var plugin = $.circuitboard.plugin({
 		name: 'position-tracking',
-		expects: ['core', 'tile-weight']
-	});
-
-
-	/* a tile method to programmatically trigger position/size recheck */
-	plugin.insert('Tile.prototype.construct', function () {
-
-		this.newEvent('reset-positioning');
-
+		expects: ['core', 'tile-grow-when-open', 'tile-grow-when-maximized', 'tile-shrink-when-hidden']
 	});
 
 
 	/* a stream limiter, setting up a window for calculating element offsets */
 	plugin.add('Circuitboard.prototype._posTrackingWindow', function (window) { window() });
 	plugin.insert('Circuitboard.prototype.construct', function () {
-		this._posTrackingLimiter = Bacon.limiter(Bacon.mergeAll([
-			Bacon.once(),
-			Bacon.interval(100)
+		this._posTrackingLimiter = Kefir.limiter(Kefir.merge([
+			Kefir.once(),
+			Kefir.interval(100)
 		]), this._posTrackingWindow.bind(this));
 	});
 
 
+	plugin.insert('Tile.prototype.construct', function () {
+
+		this.newProperty('animationIdle', { settable: false, initial: true })
+			.plug(Kefir.and([
+				this.p('fullyOpen').or(this.p('fullyClosed')),
+				this.p('fullyHidden').or(this.p('fullyVisible')),
+				this.p('fullyMaximized').or(this.p('fullyNotMaximized'))
+			]));
+
+	});
+
+
 	/* the 'offset' observable */
-	function catchUp() {
-		return Bacon.once()
-				.concat(Bacon.later(10))
-				.concat(Bacon.later(50))
-				.concat(Bacon.later(100))
-				.concat(Bacon.later(500));
-	}
 	plugin.insert('Circuitboard.prototype.construct', function () {
 
 		this.newProperty('offset', {
 			settable: false,
 			isEqual: U.Position.equals,
 			initial: this.element.offset()
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			Bacon.interval(1000)
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			Kefir.interval(1000)
 			// TODO: allow outside stream to trigger this
-		]).flatMapLatest(catchUp)
-				.limitedBy(this._posTrackingLimiter)
-				.map(() => this.element.offset()));
+		]).limitedBy(this._posTrackingLimiter).map(() => this.element.offset()));
 
 	}).insert('Tilemap.prototype.construct', function () {
 
@@ -54,13 +49,11 @@ define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U,
 			settable: false,
 			isEqual: U.Position.equals,
 			initial: this.element.offset()
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.parent.on('size').changes(),
-			this.parent.on('offset').changes()
-		]).flatMapLatest(catchUp)
-				.limitedBy(this.circuitboard._posTrackingLimiter)
-				.map(() => this.element.offset()));
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.parent.p('size').changes(),
+			this.parent.p('offset').changes()
+		]).limitedBy(this.circuitboard._posTrackingLimiter).map(() => this.element.offset()));
 
 	}).insert('Tile.prototype.construct', function () {
 
@@ -68,16 +61,21 @@ define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U,
 			settable: false,
 			isEqual: U.Position.equals,
 			initial: this.element.offset()
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.parent.on('size').changes(),
-			this.parent.on('offset').changes(),
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.parent.p('size').changes(),
+			this.parent.p('offset').changes(),
 			this.parent.on('reorganize'),
-			this.on('weight').changes(),
-			this.on('reset-positioning')
-		]).flatMapLatest(catchUp)
-				.limitedBy(this.circuitboard._posTrackingLimiter)
-				.map(() => this.element.offset()));
+			this.p('animationIdle').value(true),
+			Kefir.interval(1000).filterBy(this.p('animationIdle')) // backup timer
+		]).filter(() => !this._offsetUpdated).limitedBy(this.circuitboard._posTrackingLimiter).map(() => {
+			this._offsetUpdated = true;
+			return this.element.offset();
+		}));
+
+		/* making sure size is only updated once every 100ms, to keep things fast */
+		this._offsetUpdated = false; // TODO: write Kefir modifier to do this more easily; using .throttle doesn't work
+		Kefir.interval(100).onValue(() => { this._offsetUpdated = false });
 
 	});
 
@@ -96,22 +94,31 @@ define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U,
 		this.newProperty('position', {
 			settable: false,
 			isEqual: U.Position.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.on('offset').changes(),
-			this.circuitboard.on('offset').changes()
-		]).flatMapLatest(catchUp).map(() => U.Position.subtract(this.offset, this.circuitboard.offset)));
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.p('offset').changes(),
+			this.circuitboard.p('offset').changes()
+		]).map(() => U.Position.subtract(this.offset, this.circuitboard.offset)));
 
 	}).insert('Tile.prototype.construct', function () {
 
 		this.newProperty('position', {
 			settable: false,
 			isEqual: U.Position.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.on('offset').changes(),
-			this.circuitboard.on('offset').changes()
-		]).flatMapLatest(catchUp).map(() => U.Position.subtract(this.offset, this.circuitboard.offset)));
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.p('offset').changes(),
+			this.circuitboard.p('offset').changes(),
+			this.p('animationIdle').value(true),
+			Kefir.interval(1000).filterBy(this.p('animationIdle')) // backup timer
+		]).filter(() => !this._positionUpdated).map(() => {
+			this._positionUpdated = true;
+			return U.Position.subtract(this.offset, this.circuitboard.offset);
+		}));
+
+		/* making sure size is only updated once every 100ms, to keep things fast */
+		this._positionUpdated = false; // TODO: write Kefir modifier to do this more easily; using .throttle doesn't work
+		Kefir.interval(100).onValue(() => { this._positionUpdated = false });
 
 	});
 
@@ -122,33 +129,40 @@ define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U,
 		this.newProperty('size', {
 			settable: false,
 			isEqual: U.Size.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.options.resizeEvent || $(window).asEventStream('resize')
-		]).flatMapLatest(catchUp).map(() => new U.Size(this.element.height(), this.element.width())));
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.options.resizeEvent || $(window).asKefirStream('resize')
+		]).map(() => new U.Size(this.element.height(), this.element.width())));
 
 	}).insert('Tilemap.prototype.construct', function () {
 
 		this.newProperty('size', {
 			settable: false,
 			isEqual: U.Size.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.parent.on('size').changes()
-		]).flatMapLatest(catchUp).map(() => new U.Size(this.element.height(), this.element.width())));
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.parent.p('size').changes()
+		]).map(() => new U.Size(this.element.height(), this.element.width())));
 
 	}).insert('Tile.prototype.construct', function () {
 
 		this.newProperty('size', {
 			settable: false,
 			isEqual: U.Size.equals
-		}).addSource(Bacon.mergeAll([
-			Bacon.once(),
-			this.on('weight').changes(),
-			this.parent.on('size').changes(),
+		}).plug(Kefir.merge([
+			Kefir.once(),
+			this.parent.p('size').changes(),
 			this.parent.on('reorganize'),
-			this.on('reset-positioning')
-		]).flatMapLatest(catchUp).map(() => new U.Size(this.element.height(), this.element.width())));
+			this.p('animationIdle').value(true),
+			Kefir.interval(1000).filterBy(this.p('animationIdle')) // backup timer
+		]).filter(() => !this._sizeUpdated).map(() => {
+			this._sizeUpdated = true;
+			return new U.Size(this.element.height(), this.element.width());
+		}));
+
+		/* making sure size is only updated once every 100ms, to keep things fast */
+		this._sizeUpdated = false; // TODO: write Kefir modifier to do this more easily; using .throttle doesn't work
+		Kefir.interval(100).onValue(() => { this._sizeUpdated = false });
 
 	});
 
@@ -161,7 +175,7 @@ define(['jquery', './util/misc.js', './util/bacon-and-eggs.js'], function ($, U,
 
 	}).insert('Tile.prototype.construct', function () {
 
-		this.on('size').onValue(() => { this.parent.trigger('reorganize') });
+		this.p('size').onValue(() => { this.parent.trigger('reorganize') });
 
 	});
 

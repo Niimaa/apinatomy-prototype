@@ -4,16 +4,18 @@ define(['jquery'], function ($) {
 
 	var plugin = $.circuitboard.plugin({
 		name: 'tile-button-to-maximize',
-		requires: ['tile-buttons', 'tile-maximized']
+		requires: ['tile-buttons', 'tile-grow-when-maximized', 'tile-shrink-when-hidden']
 	}).modify('Tile.prototype');
 
 
 	plugin.insert('construct', function () {
 
-		this.addButton({ name: 'maximize', icon: require('url!./util/icons/resize-max-white.png') })
-			.onValue(() => {
+		this.addButton({ name: 'maximize', icon: require('url!./util/icons/resize-max-white.png') }).onValue(() => {
+			this.hidden = false;
+			this.p('fullyVisible').value(true).onValue(() => {
 				this.maximized = !this.maximized;
 			});
+		});
 
 	});
 

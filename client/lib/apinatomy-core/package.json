@@ -1,6 +1,6 @@
 {
   "name": "apinatomy-core",
-  "version": "0.25.2",
+  "version": "0.30.0",
   "description": "the core component (widget) of the ApiNATOMY circuit-board",
   "main": "apinatomy.js",
   "repository": "https://github.com/mhelvens/apinatomy-core.git",
@@ -18,6 +18,7 @@
     "bower": "^1.3.10",
     "css-loader": "^0.8.0",
     "expose-loader": "^0.6.0",
+    "eyes.selenium": "0.0.24",
     "file-loader": "^0.8.1",
     "generator-mhelvens-library": "^0.6.0",
     "gulp": "^3.8.7",
@@ -40,6 +41,7 @@
     "lodash": "^2.4.1",
     "rimraf": "^2.2.8",
     "sass-loader": "^0.2.0",
+    "selenium-webdriver": "^2.44.0",
     "source-map-loader": "^0.1.3",
     "style-loader": "^0.8.0",
     "traceur-loader": "^0.6.3",

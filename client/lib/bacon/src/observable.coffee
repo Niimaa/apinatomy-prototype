@@ -3,6 +3,7 @@
 # build-dependencies: functionconstruction
 # build-dependencies: optional
 # build-dependencies: reply
+# build-dependencies: event
 
 idCounter = 0
 registerObs = ->
@@ -37,8 +38,6 @@ class Observable
     f = makeFunctionArgs(arguments)
     @subscribe (event) ->
       f() if event.isEnd()
-
-  errors: -> withDescription(this, "errors", @filter(-> false))
 
   name: (name) ->
     @_name = name

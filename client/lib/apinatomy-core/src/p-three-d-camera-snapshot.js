@@ -1,4 +1,4 @@
-define(['jquery', 'bluebird', './util/misc.js', './util/bacon-and-eggs.js', 'tweenjs'], function ($, P, U, Bacon, TWEEN) {
+define(['jquery', 'bluebird', './util/misc.js', './util/kefir-and-eggs.js', 'tweenjs'], function ($, P, U, Kefir, TWEEN) {
 	'use strict';
 
 
@@ -75,12 +75,12 @@ define(['jquery', 'bluebird', './util/misc.js', './util/bacon-and-eggs.js', 'twe
 			var from = this.circuitboard.camera3D;
 			var to = this.object.camera3D;
 
-			var tweenPosition = Bacon.tween(from.position,        to.position, easing);
-			var tweenRotation = Bacon.tween(from.rotation,        to.rotation, easing);
-			var tweenUp       = Bacon.tween(from.up,              to.up,       easing);
-			var tweenTarget   = Bacon.tween(from.userData.target, target,      easing);
+			var tweenPosition = Kefir.tween(from.position,        to.position, easing);
+			var tweenRotation = Kefir.tween(from.rotation,        to.rotation, easing);
+			var tweenUp       = Kefir.tween(from.up,              to.up,       easing);
+			var tweenTarget   = Kefir.tween(from.userData.target, target,      easing);
 
-			Bacon.mergeAll([
+			Kefir.merge([
 				tweenPosition.start(),
 				tweenRotation.start(),
 				tweenUp.start(),

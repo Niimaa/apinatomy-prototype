@@ -3,9 +3,9 @@ define([
 	'three-js',
 	'./util/misc.js',
 	'bluebird',
-	'./util/bacon-and-eggs.js',
+	'./util/kefir-and-eggs.js',
 	'./Artefact.js'
-], function ($, THREE, U, P, Bacon, ArtefactP) {
+], function ($, THREE, U, P, Kefir, ArtefactP) {
 	'use strict';
 
 
@@ -14,47 +14,19 @@ define([
 	function isObject3D(v) { return v instanceof THREE.Object3D }
 	function endsWith(str, suffix) { return str.indexOf(suffix, str.length - suffix.length) !== -1 }
 
-	/* convenience function to visit all geometries in an Object3D */
-	function traverseGeometries(obj, fn) {
-		obj.traverse((subObj) => {
-			if (U.isUndefined(subObj.geometry)) { return }
-			fn(subObj.geometry);
-		});
-	}
 
-	/* convenience function to calculate overall bounding box of an object3D */
-	function calculateBoundingBox(obj) {
-		obj.userData.boundingBox = new THREE.Box3();
-		traverseGeometries(obj, (geometry) => {
-			if (geometry instanceof THREE.BufferGeometry) {
-				geometry.computeBoundingBox();
-				obj.userData.boundingBox.expandByPoint(geometry.boundingBox.min);
-				obj.userData.boundingBox.expandByPoint(geometry.boundingBox.max);
-			}
-			(geometry.morphTargets || []).concat([geometry]).forEach(({vertices}) => {
-				(vertices || []).forEach((point) => {
-					obj.userData.boundingBox.expandByPoint(point);
-				});
-			});
-		});
-	}
-
-	/* convenience function to center all the geometry of an object on its (0, 0, 0) point */
-	function startThreeDAnimation(obj) {
-		var clock = new THREE.Clock();
-		var morphObjs = [];
-		obj.traverse((subObj) => {
-			if (subObj instanceof THREE.MorphAnimMesh) {
-				morphObjs.push(subObj);
-			}
-		});
-		Bacon.animationFrames().onValue(() => {
-			var dTime = clock.getDelta();
-			morphObjs.forEach((morphObj) => {
-				morphObj.updateAnimation(1000 * dTime);
-			});
-		});
-	}
+	///* convenience function to visit all geometries in an Object3D */ // TODO: remove or use?
+	//function traverseGeometries(obj, fn) {
+	//	obj.traverse((subObj) => {
+	//		if (U.isUndefined(subObj.geometry)) { return }
+	//		fn(subObj.geometry);
+	//	});
+	//}
+	//function traverseMeshes(obj, fn) {
+	//	obj.traverse((subObj) => {
+	//		if (U.isDefined(subObj.geometry)) { fn(subObj) }
+	//	});
+	//}
 
 
 	/* a promise to the new ThreeDModel class */
@@ -65,140 +37,208 @@ define([
 		if (U.isDefined(window._amy_ThreeDModel)) { return window._amy_ThreeDModel }
 
 
-		var ThreeDModel = window._amy_ThreeDModel = Artefact.newSubclass('ThreeDModel', function ThreeDModel({visible}) {
+		/* create the class */
+		var ThreeDModel = window._amy_ThreeDModel = Artefact.newSubclass('ThreeDModel', function ThreeDModel({rootThreeDModel, visible, file, parts}) {
 
-			/* check if this is a model part or the root */
-			this._isPart = this.parent.type === 'ThreeDModel';
+
+			/* what is the 'root' 3D model? */
+			if (U.isUndefined(rootThreeDModel)) { rootThreeDModel = this }
+			this.rootThreeDModel = rootThreeDModel;
+
 
 			/* the 'visible' and 'hidden' properties */
 			this.newProperty('visible', { initial: visible });
-			this.newProperty('hidden');
-			this.p('visible').addSource(this.property('hidden').not());
-			this.p('hidden').addSource(this.property('visible').not());
-
-			/* manifest this visibility on the canvas */
-			this.p('visible').value(true).flatMap(this.p('visible')).onValue((visible) => {
-				this.object3D.then((obj) => { obj.visible = visible });
-			});
-
-			/* when the 3D model is destroyed, it is also hidden */
-			this.p('hidden').addSource(this.on('destroy').take(1).map(true));
-
-			/* when the parent is hidden, hide this model too */
-			this.p('hidden').addSource(this.parent.p('hidden').value(true));
-
-			/* grab a link to the closest ancestor tile */
-			// TODO: 3D models are now tied to a parent tile; this is not elegant
-			this._tile = this.closestAncestorByType('Tile');
+			this.newProperty('hidden').plug(this.p('visible').not());
+			this.p('visible').plug(this.p('hidden').not());
 
 
-			/* create all descendant ThreeDModel's (without necessarily loading their object3D) */
-			var INHERITED_OPTIONS = ['color', 'animation'];
-			Object.keys(this.options.parts || {}).forEach((id) => {
-
-				/* the options of the new ThreeDModel */
-				var part = this.options.parts[id];
+			/* create any ThreeDModels parts (without (yet) loading their object3D) */
+			Object.keys(parts|| {}).map((id) => {
 
 				/* define the options we want to pass to the corresponding child artefact */
-				var newChildOptions = U.extend({ id, parent: this }, part);
-				INHERITED_OPTIONS.forEach((prop) => {
+				var newChildOptions = U.extend({}, parts[id], {
+					id:              id,
+					parent:          this,
+					visible:         visible,
+					rootThreeDModel: this.rootThreeDModel
+				});
+				['color', 'animation', 'clock'].forEach((prop) => {
 					if (U.isUndefined(newChildOptions[prop])) {
 						newChildOptions[prop] = this.options[prop];
 					}
 				});
 
-				/* construct the child ThreeDModel */
-				return new window._amy_ThreeDModel(newChildOptions);
+				/* construct the child ThreeDModel */// jshint -W031
+				new window._amy_ThreeDModel(newChildOptions);
 
 			});
 
 
+			/* manifest the visibility of this model on the object3D */
+			this.object3D.then((object3D) => {
+				this.p('visible').merge(this.on('destroy').mapTo(false))
+					.onValue((visible) => { object3D.visible = visible });
+			});
+
 
 		}, {
 
+			get geometry3D() {
+				if (!this._geometry3D) {
+					this._geometry3D = new P((resolve, reject) => {
+						if (U.isDefined(this.options.file)) {
+							this.rootThreeDModel.p('visible').value(true).take(1).onValue(() => {
+
+								/* resolve this promise by loading the proper file, when the root model first becomes visible */
+								this._loadGeometryFromFile().then(resolve, reject);
+
+							});
+						} else {
+							/* this ThreeDModel has no geometry */
+							resolve(null);
+						}
+					});
+				}
+				return this._geometry3D;
+			},
+
+
+			get originalBoundingBox() {
+				if (!this._originalBoundingBox) {
+					this._originalBoundingBox = new P((resolve, reject) => {
+						if (U.isDefined(this.options.file)) {
+							this.geometry3D.then((geometry) => {
+								var boxFromFile = new THREE.Box3();
+								if (geometry instanceof THREE.BufferGeometry) {
+									geometry.computeBoundingBox();
+									boxFromFile.expandByPoint(geometry.boundingBox.min);
+									boxFromFile.expandByPoint(geometry.boundingBox.max);
+								}
+								(geometry.morphTargets || []).concat([geometry]).forEach(({vertices}) => {
+									(vertices || []).forEach((point) => {
+										boxFromFile.expandByPoint(point);
+									});
+								});
+								return boxFromFile;
+							}).then(resolve, reject);
+						} else if (U.isDefined(this.options.parts)) {
+							P.all(this.children).map(part => part.originalBoundingBox).reduce((result, bbox) => {
+								return result.expandByPoint(bbox.min).expandByPoint(bbox.max);
+							}, new THREE.Box3()).then(resolve, reject);
+						}
+					});
+				}
+				return this._originalBoundingBox;
+			},
+
+
 			get object3D() {
-				if (!this._object3D) { this._object3D = this._load() }
+				if (!this._object3D) {
+					this._object3D = this.geometry3D.then((geometry3D) => {
+
+						if (geometry3D) { // we have loaded a file
+
+							return this.rootThreeDModel.originalBoundingBox.then((originalBoundingBox) => {
+
+								/* center the geometry based on the root model's bounding box */
+								var correction = originalBoundingBox.center().negate();
+								var correctionMatrix = new THREE.Matrix4().setPosition(correction);
+								(geometry3D.morphTargets || []).forEach(({vertices}) => {
+									vertices.forEach((point) => {
+										point.applyMatrix4(correctionMatrix);
+									});
+								});
+								geometry3D.applyMatrix(correctionMatrix);
+
+								/* create material */
+								var {animation, color} = this.options;
+								var material = new THREE.MeshLambertMaterial({ color: color || 'white' });
+								material.side = THREE.DoubleSide;
+
+								/* create the object3D, either animated or not */
+								var object;
+								if (animation) {
+									/* create a mesh that can be animated */
+									object = new THREE.MorphAnimMesh(geometry3D, material);
+									object.duration = animation.duration;
+									material.morphTargets = true;
+									geometry3D.computeMorphNormals();
+
+									/* subscribe to the clock */
+									var {clock} = this.options;
+									var lastTime = 0;
+									clock.takeUntilBy(this.event('destroy')).onValue((time) => {
+										object.updateAnimation(1000 * (time - lastTime));
+										lastTime = time;
+									});
+								} else {
+									/* simple, static mesh */
+									object = new THREE.Mesh(geometry3D, material);
+								}
+								return object;
+
+							});
+
+						} else { // this is a group with parts
+
+							/* create base object3D for model parts */
+							var object = new THREE.Object3D();
+
+							/* whenever each part is loaded, add them as a child of the base object */
+							this.children.map((part) => part.object3D).forEach((partObjectP) => {
+								partObjectP.then((partObject) => { object.add(partObject) });
+							});
+
+							/* resolve this promise with the base object */
+							return P.all(this.children.map((part) => part.object3D)).each((subObject) => {
+								object.add(subObject);
+							}).return(object);
+
+						}
+
+					});
+				}
 				return this._object3D;
 			},
 
 
-			_centerGeometries(obj) {
-				if (!this.geometryCorrection) { this.geometryCorrection = this.options.geometryCorrection }
-				if (!this.geometryCorrection) { this.geometryCorrection = obj.userData.boundingBox.center().negate() }
-				traverseGeometries(obj, (geometry) => {
-					var matrix = new THREE.Matrix4().setPosition(this.geometryCorrection);
-					(geometry.morphTargets || []).forEach(({vertices}) => {
-						vertices.forEach((point) => {
-							point.applyMatrix4(matrix);
-						});
-					});
-					geometry.applyMatrix(matrix);
+			adaptToSurfaceArea(size) {
+
+				U.assert(this.rootThreeDModel === this,
+					`The 'adaptToSurfaceArea' method should only be called on a root ThreeDModel.`);
+
+				P.all([this.object3D, this.originalBoundingBox]).spread((obj, boundingBox) => {
+					/* abbreviate 3D-object width and height */
+					var objWidth = boundingBox.size().x;
+					var objHeight = boundingBox.size().y;
+
+					/* rotate 90° on the z-axis if this gives a better fit */
+					if ((size.width < size.height) !== (objWidth < objHeight)) {
+						obj.rotation.z = 0.5 * Math.PI;
+						[objWidth, objHeight] = [objHeight, objWidth];
+					} else {
+						obj.rotation.z = 0;
+					}
+
+					/* determine the scale ratio */
+					var ratio = 0.8 * Math.min(size.width / objWidth, size.height / objHeight);
+
+					/* adjust size */
+					obj.scale.set(ratio, ratio, ratio);
+
+					/* any custom 'elevation' */
+					var elevation = U.defOr(this.options.elevation, Math.min(size.width, size.height) / 4);
+					obj.position.z = 0.5 * ratio * boundingBox.size().z + elevation;
 				});
+
 			},
 
 
-			_load() {
-				var result;
-				if (U.isDefined(this.options.file))  { result = this._loadFile()  }
-				if (U.isDefined(this.options.parts)) { result = this._loadParts() }
-
-				if (!this._isPart) {
-					result = result
-						/* process the geometries and center them on (0, 0, 0) */
-						.tap(calculateBoundingBox)
-						.tap((obj) => { this._centerGeometries(obj) })
-						/* resize / rotate the object based on the shape of the tile */
-						.tap((obj) => {
-							this.p('visible').value(true).flatMap(() =>
-								this._tile.p('size').takeWhile(this.p('visible'))).onValue((size) => {
-
-								/* abbreviate 3D-object width and height */
-								var objWidth = obj.userData.boundingBox.size().x;
-								var objHeight = obj.userData.boundingBox.size().y;
-
-								/* rotate 90° on the z-axis if this gives a better fit */
-								if ((size.width < size.height) !== (objWidth < objHeight)) {
-									obj.rotation.z = 0.5 * Math.PI;
-									[objWidth, objHeight] = [objHeight, objWidth];
-								} else {
-									obj.rotation.z = 0;
-								}
-
-								/* determine the scale ratio */
-								var ratio = 0.8 * Math.min(size.width / objWidth, size.height / objHeight);
-
-								/* adjust size */
-								obj.scale.set(ratio, ratio, ratio);
-
-								/* adjust 'altitude' */
-								var elevation = U.defOr(this.options.elevation, Math.min(size.width, size.height) / 4);
-								obj.position.z = 0.5 * ratio * obj.userData.boundingBox.size().z + elevation;
-
-								/* any custom 'rotation'? */
-								if (this.options.rotation) {
-									U.extend(obj.rotation, this.options.rotation);
-								}
-
-							});
-						})
-						/* back-link the artefact to the object3D */
-						.tap((obj) => { obj.userData.artefact = this })
-						/* add this object to the scene */
-						.tap((obj) => {
-							this._tile.object3D.add(obj);
-						})
-						/* start the animation of this object, if applicable */
-						.tap(startThreeDAnimation);
-				}
-
-				return result;
-			},
-
-			_loadFile() {
-				var {file, color, animation} = this.options;
+			_loadGeometryFromFile() {
 
 				/* select the longest extension that fits the filename */
 				// e.g., "points.json" has priority over "json"
+				var {file} = this.options;
 				var ext = '';
 				Object.keys($.circuitboard.Circuitboard.threeJsLoaders).forEach((extension) => {
 					if (extension.length > ext.length) {
@@ -218,36 +258,41 @@ define([
 				U.assert(U.isDefined(Loader), `Something went wrong retrieving the 3D model loader.`);
 
 				/* return a promise to the 3D object */
-				return U.promisify(new Loader(), 'load')(file).then((obj) => {
+				return U.promisify(new Loader(), 'load')(file).then((geometry) => {
 
 					/* for now, we only accept Geometry's and Object3D's from a loader */
-					U.assert(isGeometry(obj) || isObject3D(obj),
-							`The 3D model loader for the '${ext}' extension returned an unsupported value.`);
+					U.assert(isGeometry(geometry) || isObject3D(geometry),
+						`The 3D model loader for the '${ext}' extension returned an unsupported value.`);
 
-					/* if a Geometry is returned, create an Object3D around it */
-					if (isGeometry(obj)) {
-						var geometry = obj;
-						var material = new THREE.MeshLambertMaterial({ color: color || 'white' });
-						material.side = THREE.DoubleSide;
-						if (animation) {
-							obj = new THREE.MorphAnimMesh(geometry, material);
-							obj.duration = animation.duration;
-							material.morphTargets = true;
-							geometry.computeMorphNormals(obj);
-						} else {
-							obj = new THREE.Mesh(geometry, material);
-						}
-					}
+					/* if an Object3D is returned, take only its geometry */
+					if (!isGeometry(geometry)) { geometry = geometry.geometry || geometry.children[0].geometry }
 
 					/* return the object */
-					return obj;
+					return geometry;
+
 				});
 			},
 
-			_loadParts() {
-				return P.all(this.children).map((child) => (child._object3D = child._load()))
-						.reduce((parent, child) => { parent.add(child); return parent }, new THREE.Object3D());
-			}
+
+			// UNCOMMENT THIS FOR HELP DEBUGGING OBJECT PLACEMENT
+			//_showVisibleBoundingBox() {
+			//	if (this.rootThreeDModel === this) {
+			//		var geometry = new THREE.BoxGeometry(1, 1, 1);
+			//		var material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+			//		var box = new THREE.Mesh(geometry, material);
+			//		this.object3D.then((object3D) => { object3D.add(box) });
+			//		this.originalBoundingBox.then((bb) => {
+			//			if (bb.empty()) { return }
+			//			box.position.x = 0.5 * (bb.max.x + bb.min.x);
+			//			box.position.y = 0.5 * (bb.max.y + bb.min.y);
+			//			box.position.z = 0.5 * (bb.max.z + bb.min.z);
+			//			box.scale.x = (bb.max.x - bb.min.x);
+			//			box.scale.y = (bb.max.y - bb.min.y);
+			//			box.scale.z = (bb.max.z - bb.min.z);
+			//		});
+			//	}
+			//},
+
 
 		}, {
 

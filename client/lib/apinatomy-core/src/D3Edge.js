@@ -1,10 +1,10 @@
 define([
 	'jquery',
 	'./util/misc.js',
-	'./util/bacon-and-eggs.js',
+	'./util/kefir-and-eggs.js',
 	'./Artefact.js',
 	'./D3Edge.scss'
-], function ($, U, Bacon, ArtefactP) {
+], function ($, U, Kefir, ArtefactP) {
 	'use strict';
 
 
@@ -22,10 +22,10 @@ define([
 			this._target = target;
 
 			/* when one of the vertices is destroyed, so is this edge */
-			Bacon.mergeAll([
+			Kefir.merge([
 				source.on('destroy'),
 				target.on('destroy')
-			]).take(1).assign(this, 'destroy');
+			]).take(1).onValue(() => { this.destroy() });
 
 		}, {
 

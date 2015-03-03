@@ -12,11 +12,13 @@ define(['jquery'], function ($) {
 	/*  in relation to other tiles in the same tilemap                      */
 	plugin.insert('construct', function () {
 
-		/* the 'weight' observable */
-		this.newProperty('weight', { initial: 1 });
+		// TODO: this is now done in 'tile-grow-when-' deltas
 
-		/* enact 'weight' on the DOM */
-		this.on('weight').assign(this.element, 'amyNestedFlexGrow');
+		///* the 'weight' observable */
+		//this.newProperty('weight', { initial: 1 });
+
+		///* enact 'weight' on the DOM */
+		//this.p('weight').onValue((w) => { this.element.amyNestedFlexGrow(w) });
 
 	});
 

@@ -2,12 +2,12 @@ define([
 	'jquery',
 	'bluebird',
 	'./util/misc.js',
-	'./util/bacon-signal-handler.js',
+	'./util/kefir-signal-handler.js',
 	'./util/unique-id.js',
 	'./util/main-delta-model.js',
 	'./util/plugin.js',
 	'./util/defer.js'
-], function ($, P, U, BaconSignalHandler, uniqueID, dm, plugin, defer) {
+], function ($, P, U, KefirSignalHandler, uniqueID, dm, plugin, defer) {
 	'use strict';
 
 
@@ -18,9 +18,9 @@ define([
 		if (U.isDefined(window._amy_Artefact)) { return window._amy_Artefact }
 
 
-		/** {@export @class Artefact @extends BaconSignalHandler}
+		/** {@export @class Artefact @extends KefirSignalHandler}
 		 * Use this as a subclass (or just mix it in) to provide support for
-		 * events and observable properties through Bacon.js.
+		 * events and observable properties through Kefir.js.
 		 *
 		 * Users can pass a promise through the 'beforeConstruction' option. If done, the
 		 * artefact waits on that promise before calling its 'construct' method.
@@ -28,7 +28,7 @@ define([
 		 * If it is defined, it is a promise that has to be waited for.
 		 * If not, the object instance can be used synchronously after construction.
 		 */
-		window._amy_Artefact = dm.vp('Artefact', U.newSubclass(BaconSignalHandler, (superFn) => function Artefact(options) {
+		window._amy_Artefact = dm.vp('Artefact', U.newSubclass(KefirSignalHandler, (superFn) => function Artefact(options) {
 			superFn.apply(this, arguments);
 
 			this._options = options;

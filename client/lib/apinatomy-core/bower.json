@@ -1,6 +1,6 @@
 {
   "name": "apinatomy-core",
-  "version": "0.25.2",
+  "version": "0.30.0",
   "description": "the core component (widget) of the ApiNATOMY circuit-board",
   "authors": [
     {
@@ -21,10 +21,10 @@
     "d3": "~3.4.11",
     "three.js": "*",
     "delta.js": "~0.5.0",
-    "bacon": "~0.7.37",
-    "bacon.jquery": "~0.4.11",
     "tweenjs": "*",
-    "bacon.model": "mhelvens/bacon.model#master"
+    "kefir": "~1.0.0",
+    "kefir-jquery": "~1.0.0",
+    "velocity": "~1.2.2"
   },
   "devDependencies": {
     "requirejs-domready": "~2.0.1",

@@ -1,4 +1,4 @@
-define(['jquery', './util/misc.js', 'bluebird', './util/bacon-and-eggs.js', 'three-js', 'tweenjs'], function ($, U, P, Bacon, THREE, TWEEN) {
+define(['jquery', './util/misc.js', 'bluebird', 'three-js', 'tweenjs'], function ($, U, P, THREE, TWEEN) {
 	'use strict';
 
 
@@ -28,11 +28,11 @@ define(['jquery', './util/misc.js', 'bluebird', './util/bacon-and-eggs.js', 'thr
 	//
 	//		var initialZ = this.camera3D.position.z;
 	//
-	//		var tweenXY = Bacon.tween(this.camera3D.position, coords, { duration: 800, easing: TWEEN.Easing.Sinusoidal.Out });
-	//		var tweenZ = Bacon.tween(this.camera3D.position, { z: 1.5 * initialZ }, { duration: 600, easing: TWEEN.Easing.Sinusoidal.Out })
-	//				.chain(Bacon.tween(this.camera3D.position, { z: initialZ }, { duration: 200, easing: TWEEN.Easing.Sinusoidal.In }));
+	//		var tweenXY = Kefir.tween(this.camera3D.position, coords, { duration: 800, easing: TWEEN.Easing.Sinusoidal.Out });
+	//		var tweenZ = Kefir.tween(this.camera3D.position, { z: 1.5 * initialZ }, { duration: 600, easing: TWEEN.Easing.Sinusoidal.Out })
+	//				.chain(Kefir.tween(this.camera3D.position, { z: initialZ }, { duration: 200, easing: TWEEN.Easing.Sinusoidal.In }));
 	//
-	//		var animation = Bacon.mergeAll([
+	//		var animation = Kefir.merge([
 	//			tweenZ.start(),
 	//			tweenXY.start()
 	//		]);

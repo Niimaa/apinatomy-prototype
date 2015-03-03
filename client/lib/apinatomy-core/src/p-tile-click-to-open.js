@@ -1,4 +1,4 @@
-define(['jquery', './util/codes.js', './util/bacon-and-eggs.js'], function ($, {button}) {
+define(['jquery', './util/codes.js', './util/kefir-and-eggs.js'], function ($, {button}) {
 	'use strict';
 
 

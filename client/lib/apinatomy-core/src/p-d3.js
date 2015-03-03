@@ -2,9 +2,9 @@ define([
 	'jquery',
 	'd3',
 	'./util/misc.js',
-	'./util/bacon-and-eggs.js',
+	'./util/kefir-and-eggs.js',
 	'./p-d3.scss'
-], function ($, d3, U, Bacon) {
+], function ($, d3, U, Kefir) {
 	'use strict';
 
 
@@ -55,7 +55,7 @@ define([
 
 
 		/* auto-resize the force-layout canvas */
-		this.on('size').map((v) => [v.width, v.height]).assign(this.d3Force, 'size');
+		this.on('size').map((v) => [v.width, v.height]).onValue((s) => { this.d3Force.size(s) });
 
 
 		/* create corresponding svg elements */
@@ -105,15 +105,15 @@ define([
 
 		/* a property for which vertex (if any) is being dragged */
 		var currentEventData = () => d3.select(d3.event.sourceEvent.target.parentElement).data()[0];
-		this.newProperty('draggingVertex', { initial: null }).addSource(Bacon.mergeAll([
-			Bacon.fromOnNull(this.d3Force.drag(), 'dragstart').map(currentEventData),
-			Bacon.fromOnNull(this.d3Force.drag(), 'dragend').map(null)
+		this.newProperty('draggingVertex', { initial: null }).plug(Kefir.merge([
+			Kefir.fromOnNull(this.d3Force.drag(), 'dragstart').mapTo(currentEventData),
+			Kefir.fromOnNull(this.d3Force.drag(), 'dragend').mapTo(null)
 		]));
 
 
 		/* the 'd3-tick' event-stream, and performing animation on a tick */
 		this.newEvent('d3-tick', {
-			source: Bacon.fromOnNull(this.d3Force, 'tick')
+			source: Kefir.fromOnNull(this.d3Force, 'tick')
 		}).onValue((e) => {
 
 			/* dampening factor */

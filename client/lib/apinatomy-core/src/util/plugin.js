@@ -1,12 +1,11 @@
 define([
 	'jquery',
 	'bluebird',
-	'./newWidgetType.js',
 	'./misc.js',
-	'./bacon-signal-handler.js',
+	'./kefir-signal-handler.js',
 	'./defer.js',
 	'./main-delta-model.js'
-], function ($, P, newWidgetType, U, SignalHandler, defer, dm) {
+], function ($, P, U, SignalHandler, defer, dm) {
 	'use strict';
 
 

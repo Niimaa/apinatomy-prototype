@@ -33,7 +33,7 @@ define(['jquery', './util/misc.js'], function ($, U) {
 		});
 
 		/* make setting the 'active' property affect the tile queue on the model */
-		this.on('active').value(true).onValue(() => {
+		this.p('active').value(true).onValue(() => {
 			var index = this.model._p_amyActiveTileQueue.indexOf(this);
 			if (index !== 0) {
 				this.model._p_amyActiveTileQueue.splice(index, 1);
@@ -43,7 +43,7 @@ define(['jquery', './util/misc.js'], function ($, U) {
 		});
 
 		/* automatically (un)set the CSS class 'active' */
-		this.on('active').assign(this.element, 'toggleClass', 'active');
+		this.on('active').onValue((a) => { this.element.toggleClass('active', a) });
 
 	});
 });
