@@ -2,13 +2,12 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-button-to-point-camera',
+	var plugin = $.circuitboard.plugin.do('tile-button-to-point-camera', {
 		requires: ['tile-buttons', 'three-d']
 	});
 
 
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 		this.newProperty('cameraTargetTile', { initial: null });
 
@@ -54,7 +53,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			}
 		});
 
-	}).insert('Tile.prototype.construct', function () {
+	}).append('Tile.prototype.construct', function () {
 
 		this.addButton({ name: 'pointCamera', icon: require('url!./util/icons/camera-white.png') }).onValue(() => {
 

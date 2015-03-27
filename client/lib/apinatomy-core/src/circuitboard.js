@@ -2,13 +2,13 @@ define([
 	'jquery',
 	'bluebird',
 	'./util/newWidgetType.js',
-	'./util/plugin.js'
-], function ($, P, newWidgetType, plugin) {
+	'./util/main-deltajs.js'
+], function ($, P, newWidgetType, deltaJs) {
 	'use strict';
 
 
 	/* create $.circuitboard object if it doesn't exist */
-	$.circuitboard = { plugin };
+	$.circuitboard = { plugin: deltaJs };
 
 
 	/* create the classes directly circuitboard related */

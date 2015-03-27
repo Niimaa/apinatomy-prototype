@@ -1,4 +1,4 @@
-define(['jquery', 'bluebird', './util/misc.js', './util/defer.js', './util/main-delta-model.js', './24tiles.JSON'], ($, P, U, defer, dm, tfTiles) => {
+define(['jquery', 'bluebird', './util/misc.js', './util/defer.js', './util/main-deltajs.js', './24tiles.JSON'], ($, P, U, defer, dm, tfTiles) => {
 	'use strict';
 
 

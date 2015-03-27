@@ -2,15 +2,14 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'position-tracking',
-		expects: ['core', 'tile-grow-when-open', 'tile-grow-when-maximized', 'tile-shrink-when-hidden']
+	var plugin = $.circuitboard.plugin.do('position-tracking', {
+		requires: ['core', 'tile-grow-when-open', 'tile-grow-when-maximized', 'tile-shrink-when-hidden']
 	});
 
 
 	/* a stream limiter, setting up a window for calculating element offsets */
 	plugin.add('Circuitboard.prototype._posTrackingWindow', function (window) { window() });
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 		this._posTrackingLimiter = Kefir.limiter(Kefir.merge([
 			Kefir.once(),
 			Kefir.interval(100)
@@ -18,7 +17,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 	});
 
 
-	plugin.insert('Tile.prototype.construct', function () {
+	plugin.append('Tile.prototype.construct', function () {
 
 		this.newProperty('animationIdle', { settable: false, initial: true })
 			.plug(Kefir.and([
@@ -31,7 +30,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 
 
 	/* the 'offset' observable */
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 		this.newProperty('offset', {
 			settable: false,
@@ -43,7 +42,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			// TODO: allow outside stream to trigger this
 		]).limitedBy(this._posTrackingLimiter).map(() => this.element.offset()));
 
-	}).insert('Tilemap.prototype.construct', function () {
+	}).append('Tilemap.prototype.construct', function () {
 
 		this.newProperty('offset', {
 			settable: false,
@@ -55,7 +54,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			this.parent.p('offset').changes()
 		]).limitedBy(this.circuitboard._posTrackingLimiter).map(() => this.element.offset()));
 
-	}).insert('Tile.prototype.construct', function () {
+	}).append('Tile.prototype.construct', function () {
 
 		this.newProperty('offset', {
 			settable: false,
@@ -81,7 +80,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 
 
 	/* the 'position' observable */
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 		/* for completeness sake; it's (0, 0) by definition */
 		this.newProperty('position', {
@@ -89,7 +88,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			initial: new U.Position(0, 0)
 		});
 
-	}).insert('Tilemap.prototype.construct', function () {
+	}).append('Tilemap.prototype.construct', function () {
 
 		this.newProperty('position', {
 			settable: false,
@@ -100,7 +99,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			this.circuitboard.p('offset').changes()
 		]).map(() => U.Position.subtract(this.offset, this.circuitboard.offset)));
 
-	}).insert('Tile.prototype.construct', function () {
+	}).append('Tile.prototype.construct', function () {
 
 		this.newProperty('position', {
 			settable: false,
@@ -124,7 +123,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 
 
 	/* the 'size' observable */
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 		this.newProperty('size', {
 			settable: false,
@@ -134,7 +133,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			this.options.resizeEvent || $(window).asKefirStream('resize')
 		]).map(() => new U.Size(this.element.height(), this.element.width())));
 
-	}).insert('Tilemap.prototype.construct', function () {
+	}).append('Tilemap.prototype.construct', function () {
 
 		this.newProperty('size', {
 			settable: false,
@@ -144,7 +143,7 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 			this.parent.p('size').changes()
 		]).map(() => new U.Size(this.element.height(), this.element.width())));
 
-	}).insert('Tile.prototype.construct', function () {
+	}).append('Tile.prototype.construct', function () {
 
 		this.newProperty('size', {
 			settable: false,
@@ -169,11 +168,11 @@ define(['jquery', './util/misc.js', './util/kefir-and-eggs.js'], function ($, U,
 
 	/*  if the size of any tile changes, trigger the 'reorganize'     */
 	/*  event on the parent tilemap, so that sibling tiles can react  */
-	plugin.insert('Tilemap.prototype.construct', function () {
+	plugin.append('Tilemap.prototype.construct', function () {
 
 		this.newEvent('reorganize');
 
-	}).insert('Tile.prototype.construct', function () {
+	}).append('Tile.prototype.construct', function () {
 
 		this.p('size').onValue(() => { this.parent.trigger('reorganize') });
 

@@ -1,15 +1,14 @@
-define(['jquery', './ThreeDModel.js'], function ($, ThreeDModelP) {
+define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-button-to-swap-three-d-model',
+	var plugin = $.circuitboard.plugin.do('tile-button-to-swap-three-d-model', {
 		requires: ['tile-buttons', 'three-d-geometric-models']
 	});
 
 
-	plugin.append('Tile.prototype.construct', function () {
-		ThreeDModelP.then(() => {
+	plugin.update('Tile.prototype.loadThreeDModels', (old) => function () {
+		old.call(this).then(() => {
 
 			/* an array containing null, and each 3D model artefact */
 			var models = [null].concat(this.children.filter((child) => child.type === 'ThreeDModel'));

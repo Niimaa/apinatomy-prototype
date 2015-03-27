@@ -1,8 +1,10 @@
 /* styling */
 require('./example.scss');
 
+
 /* libraries */
 var $ = require('expose?jQuery!jquery');
+
 
 /* load the circuitboard, model loader and plugins */
 var circuitboard = require('../circuitboard.js');
@@ -49,7 +51,7 @@ require('../p-tile-button-to-point-camera.js');
 
 
 /* select plugins to activate them  (note that these must already be *loaded* at this point) */
-circuitboard.plugin([
+circuitboard.plugin.select(
 	'tile-skin',
 	'tile-click-to-open',
 	'tile-grow-when-open',
@@ -69,9 +71,9 @@ circuitboard.plugin([
 	'tile-button-to-hide',
 	'tile-button-to-maximize',
 	'tile-button-to-swap-three-d-model',
-	'tile-button-to-point-camera',
+	'tile-button-to-point-camera'
 	//'ppi',
-]);
+);
 
 
 /* use the $.fn.circuitboard method to instantiate the circuit-board */

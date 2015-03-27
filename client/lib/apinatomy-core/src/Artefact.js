@@ -4,14 +4,13 @@ define([
 	'./util/misc.js',
 	'./util/kefir-signal-handler.js',
 	'./util/unique-id.js',
-	'./util/main-delta-model.js',
-	'./util/plugin.js',
+	'./util/main-deltajs.js',
 	'./util/defer.js'
-], function ($, P, U, KefirSignalHandler, uniqueID, dm, plugin, defer) {
+], function ($, P, U, KefirSignalHandler, uniqueID, deltaJs, defer) {
 	'use strict';
 
 
-	return plugin.selected.then(() => {
+	return deltaJs.selected.then(() => {
 
 
 		/* however (often) this is loaded, create the class only once */
@@ -28,7 +27,7 @@ define([
 		 * If it is defined, it is a promise that has to be waited for.
 		 * If not, the object instance can be used synchronously after construction.
 		 */
-		window._amy_Artefact = dm.vp('Artefact', U.newSubclass(KefirSignalHandler, (superFn) => function Artefact(options) {
+		window._amy_Artefact = deltaJs.vp('Artefact', U.newSubclass(KefirSignalHandler, (superFn) => function Artefact(options) {
 			superFn.apply(this, arguments);
 
 			this._options = options;
@@ -211,7 +210,7 @@ define([
 		 * A static convenience function for creating a subclass of {@link Artefact}.
 		 */
 		window._amy_Artefact.newSubclass = function newSubClass(name, constructor, prototype = {}, optionDefaults = {}) {
-			return dm.vp(name, U.newSubclass(window._amy_Artefact, (superFn) => function (options = {}) {
+			return deltaJs.vp(name, U.newSubclass(window._amy_Artefact, (superFn) => function (options = {}) {
 
 				/* process options */
 				var processedOptions = options;

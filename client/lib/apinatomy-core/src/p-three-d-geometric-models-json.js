@@ -5,8 +5,7 @@ define([
 	'use strict';
 
 	/* the plugin */
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-geometric-models-json',
+	var plugin = $.circuitboard.plugin.do('three-d-geometric-models-json', {
 		requires: ['three-d-geometric-models']
 	});
 

@@ -2,8 +2,7 @@ define(['jquery', './util/misc.js', 'bluebird', 'three-js', 'tweenjs'], function
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-auto-controls',
+	var plugin = $.circuitboard.plugin.do('three-d-auto-controls', {
 		requires: ['three-d']
 	});
 

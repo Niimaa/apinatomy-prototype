@@ -1,6 +1,6 @@
 {
   "name": "delta.js",
-  "version": "0.5.0",
+  "version": "1.1.2-alpha",
   "description": "achieve modularity and separation of concerns through feature-oriented development",
   "authors": [
     {
@@ -10,18 +10,16 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "bluebird": "^2.3.2",
-    "js-graph": "^0.4.0"
+    "js-graph": "^0.5.0"
   },
-  "devDependencies": {},
   "homepage": "https://github.com/mhelvens/delta.js",
-  "_release": "0.5.0",
+  "_release": "1.1.2-alpha",
   "_resolution": {
     "type": "version",
-    "tag": "v0.5.0",
-    "commit": "f5b6cf02c0433e0cbfab65e1a209d97a90dc5be8"
+    "tag": "v1.1.2-alpha",
+    "commit": "39afa04e1edfdeaaa92de5ccf98a6c67fb0bf221"
   },
   "_source": "git://github.com/mhelvens/delta.js.git",
-  "_target": "~0.5.0",
+  "_target": "~1.1.0-alpha",
   "_originalSource": "delta.js"
 }

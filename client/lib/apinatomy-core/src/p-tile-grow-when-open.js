@@ -7,8 +7,7 @@ define([
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-grow-when-open',
+	var plugin = $.circuitboard.plugin.do('tile-grow-when-open', {
 		requires: ['tile-open']
 	}).modify('Tile.prototype');
 
@@ -43,7 +42,7 @@ define([
 	});
 
 
-	plugin.insert('construct', function () {
+	plugin.append('construct', function () {
 
 		/* make the tile grow/shrink based on open-ness */
 		this.p('open').changes().onValue((open) => {

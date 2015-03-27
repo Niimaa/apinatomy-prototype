@@ -9,8 +9,7 @@ define([
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'core',
+	var plugin = $.circuitboard.plugin.do('core', {
 		if: true
 	});
 

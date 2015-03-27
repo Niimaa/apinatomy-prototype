@@ -175,6 +175,10 @@ define([
 									/* simple, static mesh */
 									object = new THREE.Mesh(geometry3D, material);
 								}
+
+								object.castShadow = true;
+								object.receiveShadow = false;
+
 								return object;
 
 							});

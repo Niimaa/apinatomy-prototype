@@ -1,13 +1,12 @@
 define(['jquery', './p-tile-hidden.scss'], function ($) {
 	'use strict';
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-hidden',
+	var plugin = $.circuitboard.plugin.do('tile-hidden', {
 		requires: ['tile-open']
 	}).modify('Tile.prototype');
 
 	/* allows a tile to be `hidden` */
-	plugin.insert('construct', function () {
+	plugin.append('construct', function () {
 
 		/* the 'visible' and 'hidden' properties */
 		this.newProperty('visible', { initial: true });

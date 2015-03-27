@@ -2,15 +2,14 @@ define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-weight',
+	var plugin = $.circuitboard.plugin.do('tile-weight', {
 		requires: ['core']
 	}).modify('Tile.prototype');
 
 
 	/*  gives tiles a `weight` which reflects the screen area they take up  */
 	/*  in relation to other tiles in the same tilemap                      */
-	plugin.insert('construct', function () {
+	plugin.append('construct', function () {
 
 		// TODO: this is now done in 'tile-grow-when-' deltas
 

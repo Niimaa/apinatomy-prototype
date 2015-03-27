@@ -2,13 +2,12 @@ define(['jquery', './util/misc.js'], function ($, U) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-model-snapshot',
+	var plugin = $.circuitboard.plugin.do('three-d-model-snapshot', {
 		resolves: ['three-d-geometric-models', 'snapshot']
 	});
 
 
-	plugin.insert('Snapshot.prototype.take', function () {
+	plugin.append('Snapshot.prototype.take', function () {
 
 		// TODO: this should refer to tiles by artefact id, not by model id (somehow)
 
@@ -28,7 +27,7 @@ define(['jquery', './util/misc.js'], function ($, U) {
 			});
 		}
 
-	}).insert('Snapshot.prototype.restore', function () {
+	}).append('Snapshot.prototype.restore', function () {
 
 		/* restore 3D models that are visible */
 		if (this.options.threeDModelsVisible) {

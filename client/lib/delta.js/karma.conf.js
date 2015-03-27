@@ -8,15 +8,15 @@ module.exports = function (config) {
 		colors:        true,
 		logLevel:      config.LOG_INFO,
 		autoWatch:     false,
-		browsers:      ['Chrome'],
 		singleRun:     true,
-
+		browsers:      ['PhantomJS'],
 		files: [
-			'bower_components/bluebird/js/browser/bluebird.js',
 			'bower_components/js-graph/dist/js-graph.js',
-			'dist/**/*.js',
-			'!dist/**/*.min.js',
-			'test-dist/**/*.js'
-		]
+			'dist/delta.js',
+			'test/**/*.js'
+		],
+		preprocessors: {
+			'test/**/*.js': ['babel']
+		}
 	});
 };

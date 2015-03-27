@@ -2,14 +2,13 @@ define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-open',
+	var plugin = $.circuitboard.plugin.do('tile-open', {
 		requires: ['core']
 	}).modify('Tile.prototype');
 
 
 	/* allow a tile to be `open` (or closed) */
-	plugin.insert('construct', function () {
+	plugin.append('construct', function () {
 
 		/* the 'open' observable */
 		this.newProperty('open', { initial: false });

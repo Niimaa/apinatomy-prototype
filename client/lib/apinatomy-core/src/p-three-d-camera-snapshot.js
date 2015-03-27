@@ -2,14 +2,13 @@ define(['jquery', 'bluebird', './util/misc.js', './util/kefir-and-eggs.js', 'twe
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-camera-snapshot',
+	var plugin = $.circuitboard.plugin.do('three-d-camera-snapshot', {
 		resolves: ['three-d', 'snapshot'],
 		requires: ['three-d-auto-controls']
 	});
 
 
-	plugin.insert('Snapshot.prototype.take', function () {
+	plugin.append('Snapshot.prototype.take', function () {
 
 		if (!this.options.camera3D) { return }
 
@@ -45,7 +44,7 @@ define(['jquery', 'bluebird', './util/misc.js', './util/kefir-and-eggs.js', 'twe
 			};
 		}
 
-	}).insert('Snapshot.prototype.restore', function () {
+	}).append('Snapshot.prototype.restore', function () {
 
 		if (!this.options.camera3D) { return }
 

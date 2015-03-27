@@ -2,7 +2,7 @@
 
 module.exports = function (config) {
 	config.set({
-		basePath: '),
+		basePath: '',
 		frameworks: [ 'jasmine' ],
 		files: [ 'dist/js-graph.js', 'spec/matchers.js', 'spec/**/*-spec.js' ],
 		exclude: [],

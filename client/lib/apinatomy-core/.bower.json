@@ -1,6 +1,6 @@
 {
   "name": "apinatomy-core",
-  "version": "0.30.0",
+  "version": "0.32.1",
   "description": "the core component (widget) of the ApiNATOMY circuit-board",
   "authors": [
     {
@@ -15,12 +15,11 @@
   ],
   "dependencies": {
     "jquery": "~2.1.1",
-    "js-graph": "~0.4.0",
     "bluebird": "~2.3.2",
     "chroma-js": "~0.5.8",
     "d3": "~3.4.11",
     "three.js": "*",
-    "delta.js": "~0.5.0",
+    "delta.js": "~1.1.0-alpha",
     "tweenjs": "*",
     "kefir": "~1.0.0",
     "kefir-jquery": "~1.0.0",
@@ -38,11 +37,11 @@
     "biojs"
   ],
   "homepage": "https://github.com/mhelvens/apinatomy-core",
-  "_release": "0.30.0",
+  "_release": "0.32.1",
   "_resolution": {
     "type": "version",
-    "tag": "v0.30.0",
-    "commit": "b1abc02624937b95702e6c6133893e7f6990bb23"
+    "tag": "v0.32.1",
+    "commit": "3bb706eba42f31216532d3d67e3e0c5998328dea"
   },
   "_source": "git://github.com/mhelvens/apinatomy-core.git",
   "_target": "~0",

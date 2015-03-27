@@ -10,8 +10,7 @@ define([
 
 
 	/* the plugin */
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d',
+	var plugin = $.circuitboard.plugin.do('three-d', {
 		requires: ['position-tracking', 'tile-shrink-when-hidden']
 	});
 
@@ -31,7 +30,7 @@ define([
 
 
 	/* the constructor is run once to initialize potential 3D-ness */
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 
 		/* test for browser support */
@@ -110,10 +109,9 @@ define([
 
 
 			/* lighting */
-			this._p_threeD_scene
-					.add(new THREE.AmbientLight(0x101030))
-					.add(new THREE.DirectionalLight(0xffeedd).translateX(1).translateY(-1).translateZ(1))
-					.add(new THREE.DirectionalLight(0xffeedd).translateX(-1).translateY(1).translateZ(-1));
+			this._p_threeD_scene.add(new THREE.AmbientLight(0x101030))
+				.add(new THREE.DirectionalLight(0xffeedd).translateX(1).translateY(-1).translateZ(1))
+				.add(new THREE.DirectionalLight(0xffeedd).translateX(-1).translateY(1).translateZ(-1));
 
 
 			/* renderers */
@@ -121,6 +119,8 @@ define([
 				/* WebGL renderer */
 				var webglRenderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
 				webglRenderer.sortObjects = false;
+				webglRenderer.shadowMapEnabled = true;
+				webglRenderer.shadowMapSoft = true;
 				this.p('threeDCanvasSize').takeWhileBy(this.p('threeDMode'))
 					.onValue((canvasSize) => { webglRenderer.setSize(canvasSize.width, canvasSize.height) });
 				this.on('3d-render').takeWhileBy(this.p('threeDMode'))
@@ -165,22 +165,68 @@ define([
 					});
 				});
 
-				/* webGL stand-in for the circuitboard */
-				var threeDCircuitboardMesh = new THREE.Mesh(
-					new THREE.PlaneBufferGeometry(1, 1),
-					new THREE.MeshBasicMaterial({
-						color: 'black',
-						opacity: 0,
-						blending: THREE.NoBlending
-					})
-				);
-				this._p_threeD_scene.add(threeDCircuitboardMesh);
-				this.on('threeDCanvasSize').takeWhileBy(this.p('threeDMode')).onValue((canvasSize) => {
-					threeDCircuitboardMesh.scale.x = canvasSize.width - margin0.left - margin0.right;
-					threeDCircuitboardMesh.scale.y = canvasSize.height - margin0.top - margin0.bottom;
-				});
+				/* WebGL stand-in for the circuitboard - obscures objects and receives cast shadows */
+				this._p_threeD_scene.add((() => {
+					var planeFragmentShader = `
+						uniform vec3 diffuse;
+						uniform float opacity;
+						${THREE.ShaderChunk['color_pars_fragment']}
+						${THREE.ShaderChunk['map_pars_fragment']}
+						${THREE.ShaderChunk['lightmap_pars_fragment']}
+						${THREE.ShaderChunk['envmap_pars_fragment']}
+						${THREE.ShaderChunk['fog_pars_fragment']}
+						${THREE.ShaderChunk['shadowmap_pars_fragment']}
+						${THREE.ShaderChunk['specularmap_pars_fragment']}
+						void main() {
+							gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+							${THREE.ShaderChunk['map_fragment']}
+							${THREE.ShaderChunk['alphatest_fragment']}
+							${THREE.ShaderChunk['specularmap_fragment']}
+							${THREE.ShaderChunk['lightmap_fragment']}
+							${THREE.ShaderChunk['color_fragment']}
+							${THREE.ShaderChunk['envmap_fragment']}
+							${THREE.ShaderChunk['shadowmap_fragment']}
+							${THREE.ShaderChunk['linear_to_gamma_fragment']}
+							${THREE.ShaderChunk['fog_fragment']}
+							gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0 - shadowColor.x);
+						}
+					`;
+					var threeDCircuitboardMesh = new THREE.Mesh(
+						new THREE.PlaneBufferGeometry(1, 1),
+						new THREE.ShaderMaterial({
+							uniforms: THREE.ShaderLib['basic'].uniforms,
+							vertexShader: THREE.ShaderLib['basic'].vertexShader,
+							fragmentShader: planeFragmentShader
+						})
+					);
+					threeDCircuitboardMesh.receiveShadow = true;
+					threeDCircuitboardMesh.castShadow = false;
+					this.on('threeDCanvasSize').takeWhileBy(this.p('threeDMode')).onValue((canvasSize) => {
+						threeDCircuitboardMesh.scale.x = canvasSize.width - margin0.left - margin0.right;
+						threeDCircuitboardMesh.scale.y = canvasSize.height - margin0.top - margin0.bottom;
+					});
+					return threeDCircuitboardMesh;
+				})());
 
-				/* its backface */
+				/* directional light to cast shadows */
+				this._p_threeD_scene.add((() => {
+					var light = new THREE.DirectionalLight(0xffffff);
+					light.position.set(0, 0, 1000);
+					light.castShadow = true;
+					light.onlyShadow = true;
+					light.shadowMapWidth  = 10000;
+					light.shadowMapHeight = 10000;
+					light.shadowCameraFar    =  1001;
+					// The shadow camera should always be larger than the circuitboard.
+					// Unfortunately, lights cannot be updated at runtime, so 10000x10000 it is.
+					light.shadowCameraLeft   = -5000;
+					light.shadowCameraRight  =  5000;
+					light.shadowCameraTop    = -5000;
+					light.shadowCameraBottom =  5000;
+					return light;
+				})());
+
+				/* the circuit board backface */
 				var backfaceGeometry = new THREE.Geometry();
 				backfaceGeometry.vertices.push(
 					new THREE.Vector3(-0.5, -0.5, 0),
@@ -259,10 +305,11 @@ define([
 	//	};
 	//
 	//});
+	// TODO: have a look here: http://stackoverflow.com/questions/13055214/mouse-canvas-x-y-to-three-js-world-x-y-z/13091694#13091694
 
 
 	/* artefact-specific object3D objects */
-	plugin.insert('Tile.prototype.construct', function () {
+	plugin.append('Tile.prototype.construct', function () {
 		this.circuitboard.on('threeDMode').value(true).onValue(() => {
 
 			/* create the 3D object for this tile */

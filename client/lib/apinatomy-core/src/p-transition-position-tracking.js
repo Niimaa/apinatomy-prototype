@@ -6,14 +6,13 @@ define([
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'transition-position-tracking',
+	var plugin = $.circuitboard.plugin.do('transition-position-tracking', {
 		resolves: ['position-tracking', 'tile-grow-when-open']
 	});
 
 
 	/* make sure that positioning is updated during CSS3 transition animations */
-	plugin.insert('Tile.prototype.construct', function () {
+	plugin.append('Tile.prototype.construct', function () {
 
 		// TODO: maybe just remove this whole delta
 

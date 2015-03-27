@@ -2,14 +2,13 @@ define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'd3-three-d',
+	var plugin = $.circuitboard.plugin.do('d3-three-d', {
 		resolves: ['d3', 'three-d-manual-controls']
 	}).modify('Circuitboard.prototype');
 
 
 	/* while dragging a vertex, lock the 3D camera */
-	plugin.after('construct', function () {
+	plugin.append('construct', function () {
 
 		this.on('draggingVertex').filter((v) => v && this.threeDManualControlsEnabled).onValue(() => {
 			this.threeDManualControlsEnabled = false;

@@ -9,14 +9,13 @@ define([
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'ppi',
+	var plugin = $.circuitboard.plugin.do('ppi', {
 		requires: ['d3']
 	});
 
 
 	// TODO: implement this properly; this is just for testing purposes
-	plugin.insert('Tile.prototype.construct', function () {
+	plugin.append('Tile.prototype.construct', function () {
 
 		var D3Group = D3GroupP.value();
 		var D3Vertex = D3VertexP.value();

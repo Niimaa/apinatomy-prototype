@@ -2,13 +2,12 @@ define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-maximized-snapshot',
+	var plugin = $.circuitboard.plugin.do('tile-maximized-snapshot', {
 		resolves: ['tile-maximized', 'snapshot']
 	});
 
 
-	plugin.insert('Snapshot.prototype.take', function () {
+	plugin.append('Snapshot.prototype.take', function () {
 
 		// TODO: this should refer to tiles by artefact id, not by model id (somehow)
 
@@ -32,7 +31,7 @@ define(['jquery'], function ($) {
 			});
 		}
 
-	}).insert('Snapshot.prototype.restore', function () {
+	}).append('Snapshot.prototype.restore', function () {
 
 		/* restore tiles that are maximized */
 		if (this.options.tilesMaximized) {

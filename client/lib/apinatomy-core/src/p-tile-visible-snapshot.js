@@ -2,13 +2,12 @@ define(['jquery'], function ($) {
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-visible-snapshot',
+	var plugin = $.circuitboard.plugin.do('tile-visible-snapshot', {
 		resolves: ['tile-hidden', 'snapshot']
 	});
 
 
-	plugin.insert('Snapshot.prototype.take', function () {
+	plugin.append('Snapshot.prototype.take', function () {
 
 		// TODO: this should refer to tiles by artefact id, not by model id (somehow)
 
@@ -32,7 +31,7 @@ define(['jquery'], function ($) {
 			});
 		}
 
-	}).insert('Snapshot.prototype.restore', function () {
+	}).append('Snapshot.prototype.restore', function () {
 
 		/* restore tiles that are visible */
 		if (this.options.tilesVisible) {

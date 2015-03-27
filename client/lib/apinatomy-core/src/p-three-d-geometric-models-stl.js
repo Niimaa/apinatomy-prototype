@@ -7,8 +7,7 @@ define([
 
 
 	/* the plugin */
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-geometric-models-stl',
+	var plugin = $.circuitboard.plugin.do('three-d-geometric-models-stl', {
 		requires: ['three-d-geometric-models']
 	});
 

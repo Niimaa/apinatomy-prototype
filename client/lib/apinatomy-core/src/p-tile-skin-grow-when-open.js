@@ -2,8 +2,7 @@ define(['jquery', 'bluebird', './p-tile-skin-grow-when-open.scss'], function ($,
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-skin-grow-when-open',
+	var plugin = $.circuitboard.plugin.do('tile-skin-grow-when-open', {
 		resolves: ['tile-skin', 'tile-grow-when-open']
 	}).modify('Tile.prototype');
 
@@ -11,7 +10,7 @@ define(['jquery', 'bluebird', './p-tile-skin-grow-when-open.scss'], function ($,
 	///*  react to a tile opening or closing by      */
 	///*  timely showing/hiding the content section  */
 	///*  to ensure smooth transition animation      */
-	//plugin.insert('construct', function () {
+	//plugin.append('construct', function () {
 	//	var sectionElement = this.element.children('section');
 	//	this.p('open').value(true).onValue(() => {
 	//		sectionElement.css('opacity', 0);

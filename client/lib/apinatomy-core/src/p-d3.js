@@ -8,13 +8,12 @@ define([
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'd3',
+	var plugin = $.circuitboard.plugin.do('d3', {
 		requires: ['core', 'position-tracking']
 	}).modify('Circuitboard.prototype');
 
 
-	plugin.insert('construct', function () {
+	plugin.append('construct', function () {
 		this._p_d3_vertices = {};
 		this._p_d3_edges = {};
 

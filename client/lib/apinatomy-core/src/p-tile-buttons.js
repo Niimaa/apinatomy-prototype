@@ -8,8 +8,7 @@ define([
 
 
 	/* the plugin */
-	var plugin = $.circuitboard.plugin({
-		name: 'tile-buttons',
+	var plugin = $.circuitboard.plugin.do('tile-buttons', {
 		requires: ['core']
 	});
 

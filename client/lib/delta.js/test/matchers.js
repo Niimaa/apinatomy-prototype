@@ -1,5 +1,7 @@
 'use strict';
 
+window.any = jasmine.any;
+
 beforeEach(() => {
 	jasmine.addMatchers({
 		toBeReachable() {
@@ -17,27 +19,31 @@ beforeEach(() => {
 				compare(actual, expectedType, expectedContent) {
 					var result = {};
 					result.message = "";
-
-					if (typeof expectedContent === 'undefined') {
-						expectedContent = {};
-					}
-
+					var messageEnd = "";
 					try {
 						actual();
 						result.pass = false;
+						messageEnd = "However, no exception was thrown.";
 					} catch (exception) {
 						result.pass = exception instanceof expectedType;
 						if (result.pass) {
-							result.pass = Object.keys(expectedContent).every((prop) => util.equals(expectedContent[prop], exception[prop], customEqualityTesters));
-							result.message = `However, the thrown ${expectedType.prototype.name} had the following properties: ${JSON.stringify(exception, null, ' ')}`;
+							result.pass = Object.keys(expectedContent || {}).every((prop) => util.equals(expectedContent[prop], exception[prop], customEqualityTesters));
+							messageEnd = `However, the thrown ${expectedType.prototype.name} had the following properties: ${JSON.stringify(exception, null, ' ')}`;
 						} else {
-							result.message = `However, the thrown exception was not a subclass of ${expectedType.prototype.name}.`;
+							messageEnd = `However, the thrown exception was not a subclass of ${expectedType.name}.`;
+							if (typeof exception.name === 'string') { messageEnd += ` It is of type ${exception.name}.` }
+							messageEnd += `\n${exception.message}`;
+							if (exception.stack) { messageEnd += `\n${exception.stack}` }
 						}
 					}
 
-					result.message = `Expected the function to throw a new ${expectedType.prototype.name} with the following properties:
-									 ${JSON.stringify(expectedContent, null, ' ')}.
-									 ${result.message}`;
+					result.message = `Expected the function to throw a new ${expectedType.name}`;
+					if (expectedContent) {
+						result.message += ` with the following properties:\n${JSON.stringify(expectedContent, null, ' ')}\n`;
+					} else {
+						result.message += ".\n";
+					}
+					result.message += messageEnd;
 
 					return result;
 				}

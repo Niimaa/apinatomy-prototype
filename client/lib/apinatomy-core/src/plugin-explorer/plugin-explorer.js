@@ -50,7 +50,7 @@ $(document).ready(() => {
 
 	createDiagram(
 		$('body > svg'),
-		$.circuitboard.plugin.graph()
+		$.circuitboard.plugin.do().delta().graph
 	);
 
 });

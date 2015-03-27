@@ -10,8 +10,7 @@ define([
 
 
 	/* the plugin */
-	var plugin = $.circuitboard.plugin({
-		name: 'three-d-geometric-models',
+	var plugin = $.circuitboard.plugin.do('three-d-geometric-models', {
 		requires: ['three-d', 'three-d-spinner']
 	});
 
@@ -20,13 +19,14 @@ define([
 	plugin.add('Circuitboard.threeJsLoaders', {});
 
 
-	/* load any 3D models associated with a tile */
-	plugin.insert('Tile.prototype.construct', function () {
+	/* to load any 3D models associated with a tile */
+	plugin.add('Tile.prototype.loadThreeDModels', function () {
 		var threeDModels = this.circuitboard.options.threeDModels;
-		if (threeDModels && threeDModels[this.model.id]) {
-			this.threeDModels = {};
-			ThreeDModelP.then((ThreeDModel) => {
-				Object.keys(threeDModels[this.model.id]).forEach((modelID) => {
+		if (!threeDModels) { return }
+		return P.all([this.model, ThreeDModelP]).spread((tileModel, ThreeDModel) => {
+			if (threeDModels[tileModel.id]) {
+				this.threeDModels = {};
+				Object.keys(threeDModels[tileModel.id]).forEach((modelID) => {
 
 					/* create a simple clock for animated models */
 					// TODO: at some point, we change this to a more global clock
@@ -34,12 +34,13 @@ define([
 					var clockStream = Kefir.animationFrames().map(() => clock.getElapsedTime());
 
 					/* create the model artefact */
-					var model = this.threeDModels[modelID] = new ThreeDModel(U.extend({}, threeDModels[this.model.id][modelID], {
-						id: modelID,
-						parent: this,
-						clock: clockStream,
-						visible: false
-					}));
+					var model = this.threeDModels[modelID] =
+						new ThreeDModel(U.extend({}, threeDModels[tileModel.id][modelID], {
+							id:      modelID,
+							parent:  this,
+							clock:   clockStream,
+							visible: false
+						}));
 
 					/* when the object is created, add it to the scene and dynamically resize */
 					model.object3D.then((object) => {
@@ -55,8 +56,15 @@ define([
 					});
 
 				});
-			});
-		}
+				return this.threeDModels;
+			}
+		});
+	});
+
+
+	/* load any 3D models associated with a tile */
+	plugin.append('Tile.prototype.construct', function () {
+		this.loadThreeDModels();
 	});
 
 

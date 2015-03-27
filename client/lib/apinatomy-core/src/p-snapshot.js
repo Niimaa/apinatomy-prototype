@@ -2,13 +2,12 @@ define(['jquery', './util/misc.js', './Snapshot.js'], function ($, U, SnapshotP)
 	'use strict';
 
 
-	var plugin = $.circuitboard.plugin({
-		name: 'snapshot',
+	var plugin = $.circuitboard.plugin.do('snapshot', {
 		requires: ['core']
 	});
 
 
-	plugin.insert('Circuitboard.prototype.construct', function () {
+	plugin.append('Circuitboard.prototype.construct', function () {
 
 		var Snapshot = SnapshotP.value();
 
